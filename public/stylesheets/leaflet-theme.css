@@ -1,0 +1,65 @@
+/* We're using !important to overwrite basic leaflet styles here */
+.leaflet-container{
+  outline: none;
+}
+
+.leaflet-control-layers{
+  background: #252830 !important;
+  color: #fff !important;
+  border-radius: 0 !important ;
+}
+
+.leaflet-control-zoom-in, .leaflet-control-zoom-out{
+  background: #252830 !important;
+  color: #fff !important;
+  border-radius: 0 !important;
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  transition: all .15s ease-in-out;
+  -moz-transition: all .15s ease-in-out;
+  -webkit-transition: all .15s;
+}
+
+.leaflet-control-zoom-in.leaflet-disabled,
+.leaflet-control-zoom-out.leaflet-disabled{
+  background: #3b3c41 !important;
+  opacity: 0.8;
+}
+
+.leaflet-popup-content-wrapper{
+  border-radius: 0 !important;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip{
+  background: #252830 !important;
+  color: #fff !important;
+}
+
+.leaflet-popup-close-button{
+  display: none;
+}
+
+.leaflet-editing-icon, .leaflet-vertex-icon{
+  border-radius: 50%;
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+}
+
+.leaflet-middle-icon{
+  border-radius: 50%;
+  height: 10px !important;
+  width: 10px !important;
+  margin-left: -5px !important;
+  margin-top: -5px !important;
+}
+
+div.leaflet-top.leaflet-left{
+  /*display: none;*/
+}
+
+.leaflet-popup{
+  min-width: 240px;
+}

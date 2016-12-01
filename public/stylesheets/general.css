@@ -1,0 +1,383 @@
+*{
+  font-family: 'Open Sans', arial, sans-serif;
+}
+
+html, body{
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+  margin:0;
+}
+
+#interface{
+  width: 100%;
+  height:100%;
+  overflow:hidden;
+  background:#252830;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+#input{
+  z-index: 901;
+  width: 250px;
+  min-height: 100%;
+  color: #fff;
+  box-shadow: -3px 0px 7px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  background:#252830;
+  color: #fff;
+}
+
+#map {
+  flex: 1;
+  min-height: 100%;
+  background:#fff;
+ }
+
+ #send{
+   background: #12ab81;
+   width: 160px;
+   color: white;
+   padding: 2px;
+   font-weight: bolder;
+   cursor: pointer;
+   margin-left: 40px;
+   margin-top: 70px;
+   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+ }
+
+#openHide{
+  position: absolute;
+  top: 50%;
+  right: 250px;
+  cursor: pointer;
+  height: 60px;
+  width: 38px;
+  border-radius: 90px 0 0 90px;
+  -moz-border-radius: 90px 0 0 90px;
+  -webkit-border-radius: 90px 0 0 90px;;
+  color: white;
+  opacity: 0.75;
+  background: #252830;
+  z-index: 900;
+  transition: background-color .2s ease-in-out;
+  -moz-transition: background-color .2s ease-in-out;
+  -webkit-transition: background-color .2s;
+}
+
+#openHide:hover{
+  background: #434857;
+}
+
+#openHide > i {
+  margin-top: 20px;
+  margin-left: 18px;
+}
+
+.main{
+  position: relative;
+  z-index: 9001;
+  display: block !important;
+}
+
+.theme{
+  display: none;
+}
+
+.logo{
+  display: none;
+}
+
+.logo > img{
+  position: relative;
+  width: 220px;
+  text-align: center;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+ #menu{
+   background: #1f2025;
+   height: 40px;
+   white-space: nowrap;
+ }
+
+.menu-item{
+  height: 30px;
+  margin-top: 10px;
+  width: 110px;
+  bottom: 0;
+  background: #252830;
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  cursor: pointer;
+  margin-left: 2px;
+  margin-right: 2px;
+  transition: all .1s ease-in-out;
+  -moz-transition: all .1s ease-in-out;
+  -webkit-transition: all .1s;
+  border-bottom: 2px solid #1f2025;
+  box-sizing: border-box;
+-moz-box-sizing: border-box;
+-webkit-box-sizing: border-box;
+}
+
+.menu-selected{
+  background: #1ca8dd;
+  border-bottom: none !important;
+}
+
+.menu-selected:hover{
+  background: #1ca8dd !important;
+}
+
+.menu-item:hover{
+  background: #1f6b88;
+}
+
+.menu-item > p{
+  margin: 0;
+  margin-top: 4px;
+}
+
+#editButtons{
+  margin-left: 40px;
+  margin-top: 30px;
+  width: 160px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+#editButtons > div {
+  background: #434857;
+  margin-top: 2px;
+  width: 160px;
+  padding: 2px;
+}
+
+#editButtons > div > p {
+  font-size: smaller;
+}
+
+#editButtons > div:hover,
+#editGeom:hover,
+#deleteGeom:hover,
+#addCollumn:hover{
+  transition: all .15s ease-in-out;
+  -moz-transition: all .15s ease-in-out;
+  -webkit-transition: all .15s;
+  background: #1ca8dd;
+  cursor: pointer;
+}
+
+#editGeom,
+#deleteGeom,
+#addCollumn{
+  background: #434857;
+  padding: 6px;
+  width: 100px;
+  height: 18px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  cursor: pointer;
+}
+
+#editGeom{
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+#deleteGeom{
+  margin-top: -34px;
+  margin-left: 134px;
+  margin-bottom: 4px;
+}
+
+#addCollumn{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  background: #434857;
+}
+
+#deleteGeom > p,
+#addCollumn > p,
+#editGeom > p{
+  margin: 0;
+}
+
+#input > p{
+  color: #888;
+}
+
+#wfsLayers{
+  margin-top: 25px;
+}
+
+#layers, .layer-list{
+  list-style: none;
+  text-align: left;
+  font-size: smaller;
+  max-width: 160px;
+}
+
+.layer{
+  background: #434857;
+  padding: 8px;
+  margin-top: 2px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.layer > p{
+  margin: 0;
+}
+
+.layer:hover{
+  background: #187a59;
+  cursor: pointer;
+  transition: all .10s ease-in-out;
+  -moz-transition: all .10s ease-in-out;
+  -webkit-transition: all .10s;
+}
+
+.off{
+  background: #e64759 !important;
+}
+.on, .layer-on{
+  background: #1bc98e !important;
+}
+
+.layer-off{
+  /*background: #434857 !important;*/
+}
+
+#wfsLayers > p, #wmsLayers > p{
+  white-space: nowrap;
+  text-align: left;
+  margin-left: 40px;
+  margin-bottom: -6px;
+}
+
+#snapping, #getFeatureInfo{
+  transition: all .10s ease-in-out;
+  -moz-transition: all .10s ease-in-out;
+  -webkit-transition: all .10s;
+  max-width: 144px;
+  padding: 8px;
+  margin-left: 40px;
+  margin-top: 36px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  text-align: left;
+}
+
+#bygID{
+  background: #252830;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  position: relative;
+  display: block;
+  bottom: 2px;
+  margin: 0 auto;
+  color: white;
+  width: 300px;
+  height: 30px;
+  text-align: center;
+  z-index: 1002;
+}
+
+#bygID > p{
+  margin: 0;
+  margin-top: 10px;
+  padding-top: 6px;
+  font-weight: bolder;
+}
+
+#snapping > p{
+  padding-left: 42px;
+}
+#getFeatureInfo > p{
+  padding-left: 26px;
+}
+#snapping > p, #getFeatureInfo > p{
+  margin: 0;
+  font-size: smaller;
+}
+
+#snapping:hover, #getFeatureInfo:hover{
+  cursor: pointer;
+}
+
+.unselectable-text {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.selected{
+  background: #1ca8dd !important;
+}
+
+.unselectable{
+  pointer-events: none !important;
+  opacity: 0.60;
+  cursor: not-allowed !important;
+}
+
+.idTag{
+  margin-top: 30px;
+  color: #888;
+  white-space: nowrap;
+  text-align: left;
+  margin-left: 40px;
+}
+
+.dropDown > p{
+ cursor: pointer;
+ padding-left: 6px !important;
+ padding-right: 6px !important;
+}
+
+.dropDown:hover{
+  background: #1ca8dd;
+}
+
+.dropDown-content {
+  position: absolute;
+  display: none;
+  background: #434857;
+  color: #fff;
+  min-width: 160px;
+  overflow: auto;
+  z-index: 901;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.dropDown-content > ul{
+  list-style: none;
+  margin: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.dropDown-content > ul > li{
+  margin-left: -40px;
+  padding-left: 16px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.dropDown-content > ul > li:hover{
+  cursor: pointer;
+  background: #1ca8dd;
+}
+
+.show {display:block;}
+
+@media (max-width:700px){
+  #bygID{
+    display: none;
+  }
+}

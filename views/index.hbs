@@ -1,0 +1,50 @@
+<div id="interface">
+  <div id="openHide" class="open">
+      <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+  </div>
+  <div id="input">
+    <div id="menu">
+      <div id="menu-edit-top" class="unselectable-text menu-item menu-selected">
+        <p>Rediger</p>
+      </div>
+      <div id="menu-view-top" class="unselectable-text menu-item">
+        <p>Temavælger</p>
+      </div>
+    </div>
+    <div id="menu-edit-main" class="main theme">
+      <div id="editLayer">
+        <div id="editButtons">
+          <div id="polygons" class="unselectable-text"><p>Opret polygon</p></div>
+          <div id="lines" class="unselectable-text"><p>Opret linie</p></div>
+        </div>
+        <div id="snapping" class="off unselectable-text">
+          <p>Snapping</p>
+        </div>
+        <div id="send" class="unselectable-text">
+          <p>Send til Database</p>
+        </div>
+      </div>
+    </div>
+    <div id="menu-view-main" class="theme">
+      <div id="wfsLayers">
+        <p>Vektor lag</p>
+        <ul id="layers"></ul>
+      </div>
+      <div id="wmsLayers">
+        <p>Raster Lag</p>
+      </div>
+      <div id="getFeatureInfo" class="off unselectable-text">
+        <p>GetFeatureInfo</p>
+      </div>
+    </div>
+  </div>
+  <div id="map">
+    <div id="bygID">
+      <p>noID</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  init();
+</script>
