@@ -15,8 +15,24 @@
           console.log("AJAX call failed: " + status + ", " + error);
       });
     },
-    // Get all geometries with projectID
-    // e.g.: db.get('f5523914-3a65-e511-9bc6-f4b7e2e7153e')
+
+    latest: function(callback){
+      $.ajax({
+          type: "GET",
+          url: '/api/latest/',
+          dataType: "json"
+      }).done(function (res) {
+          console.log(res);
+          if(callback){
+            return callback(res);
+          } else {
+            return res;
+          }
+      }).fail(function (jqXHR, status, error) {
+          console.log("AJAX call failed: " + status + ", " + error);
+      });
+
+    },
     get: function(str_projectID){
       $.ajax({
           type: "GET",
@@ -93,13 +109,30 @@
 
     // WRITE TO DATABASE ({ProjektID: "casper skrev det her"})
     write: function(obj){
+      var keys = '';
+      var values = '';
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          keys += key + ", ";
+          values += "'" + obj[key] + "', ";
+        }
+      }
+      keys = keys.slice(0, -2);
+      values = values.slice(0, -2);
+
+      var postObj = {
+        "keys": keys,
+        "values": values
+      };
+
       $.ajax({
         type: "POST",
         url: '/api/post/',
         dataType: "json",
-        data: obj
+        data: postObj
       }).done(function (res){
         console.log(res);
+        console.log(db.latest());
       }).fail(function (jqXHR, status, error){
         console.log("AJAX call failed: " + status + ", " + error);
       });

@@ -4,18 +4,6 @@ function init(){
   query = QueryString();
   if(query){jQuery("#bygID > p").text(query.ID);}
 
-  $( window ).resize(function() {
-    if($( window ).width() < 900){
-      if($("#openHide").hasClass("open")){
-        $("#openHide").click();
-      }
-    } else if($(window).width() > 900){
-      if($("#openHide").hasClass("closed")){
-        $("#openHide").click();
-      }
-    }
-  });
-
   // create the map
   map = L.map('map', {
     center: [55.787016, 12.522536],

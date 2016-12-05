@@ -202,16 +202,6 @@ function interface(){
     if (e.layer instanceof L.Path) e.layer.on('click', L.DomEvent.stop).on('click', deleteShape, e.layer);
   });
 
-  if($( window ).width() < 900){
-    if($("#openHide").hasClass("open")){
-      $("#openHide").click();
-    }
-  } else if($(window).width() > 900){
-    if($("#openHide").hasClass("closed")){
-      $("#openHide").click();
-    }
-  }
-
   $("#deleteGeom").click(function(){
 
     // TEST IF SERVER IS UP
