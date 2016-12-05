@@ -29,14 +29,14 @@ function init(){
     doubleClickZoom: false,
     editable: true
   });
-  
-  /* 
+
+  /*
      * Workaround for 1px lines appearing in some browsers due to fractional transforms
      * and resulting anti-aliasing.
      * https://github.com/Leaflet/Leaflet/issues/3575
   */
   (function(){
-      var originalInitTile = L.GridLayer.prototype._initTile
+      var originalInitTile = L.GridLayer.prototype._initTile;
       L.GridLayer.include({
           _initTile: function (tile) {
               originalInitTile.call(this, tile);
@@ -45,7 +45,7 @@ function init(){
               tile.style.height = tileSize.y + 1 + 'px';
           }
       });
-  })()
+  })();
 
   // GST Ortho 2016
   var GST_Ortho = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=orto_foraar', {
