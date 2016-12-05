@@ -85,7 +85,7 @@
 
       for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
-          if(key !== "CG_ID"){
+          if(key !== "CG_ID" && key !== "CG_GEOMETRY"){
             updateString += key + " = '" + obj[key] + "', ";
           }
         }
@@ -93,7 +93,11 @@
 
       updateString = updateString.slice(0, -2);
 
-      var postObj = {CG_ID: obj.CG_ID, request: updateString};
+      var postObj = {
+        CG_ID: obj.CG_ID,
+        request: updateString, 
+        geometry: JSON.stringify(obj.CG_GEOMETRY)
+      };
 
       $.ajax({
         type: "POST",
@@ -113,8 +117,10 @@
       var values = '';
       for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
-          keys += key + ", ";
-          values += "'" + obj[key] + "', ";
+          if(key !== "CG_GEOMETRY"){
+            keys += key + ", ";
+            values += "'" + obj[key] + "', ";
+          }
         }
       }
       keys = keys.slice(0, -2);
@@ -122,8 +128,11 @@
 
       var postObj = {
         "keys": keys,
-        "values": values
+        "values": values,
+        "geometry": JSON.stringify(obj.CG_GEOMETRY)
       };
+
+      console.log(postObj);
 
       $.ajax({
         type: "POST",

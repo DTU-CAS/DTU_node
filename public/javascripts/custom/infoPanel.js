@@ -74,12 +74,26 @@
              layer.toggleEdit();
              $(this).removeClass("enabled-edit").addClass("disabled-edit");
              $(this).first().text("Rediger");
+
+             var updateObj = {};
+             for(var key in layer.feature.properties){
+              if (layer.feature.properties.hasOwnProperty(key)) {
+                if(layer.feature.properties[key] !== null){
+                  updateObj[key] = layer.feature.properties[key];
+                }
+              }
+             }
+             updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
+
+             db.update(updateObj);
            }
          });
 
          $("#deleteGeom").click(function(){
            map.removeLayer(layer);
            map.closePopup();
+           console.log(layer.feature.properties.CG_ID);
+           db.delete("ALL", layer.feature.properties.CG_ID);
          });
        }}
      })
