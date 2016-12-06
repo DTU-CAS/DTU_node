@@ -126,79 +126,83 @@ function interface(){
       // change style
     })
     .on('editable:created', function (e) {
-      e.layer.options.editable = true;
+      // e.layer.options.editable = true;
       // reverse style
     })
     .on('editable:drawing:end', function (e){
       if(e.layer._parts){
         if(e.layer._parts.length > 0){
-          var wkt = new Wkt.Wkt();
-          json = e.layer.toGeoJSON();
+          var json = e.layer.toGeoJSON();
           json.properties = {
-            "ID": QueryString().ID,
-            "WKT": wkt.read(JSON.stringify(json)).write()
+            "ProjektID": QueryString().ID
+            // "WKT": wkt.read(JSON.stringify(json)).write()
           };
-          map.removeLayer(e.layer);
-          wkt.read(JSON.stringify(json)).write();
-          var addLayer = eventJSON(json,
-            {color: "#1ca8dd"},
-            {color: "#28edca"},
-            true
-          ).addTo(map);
 
-          db.write({
+          var preObject = {
             CG_GEOMETRY: json.geometry,
             Projektleder: "Casper",
             Status: "Påbegyndt",
-            ProjektID: json.properties.ID
+            ProjektID: json.properties.ProjektID
+          };
+
+          var keys = '';
+          var values = '';
+          for (var key in preObject) {
+            if (preObject.hasOwnProperty(key)) {
+              if(key !== "CG_GEOMETRY"){
+                keys += key + ", ";
+                values += "'" + preObject[key] + "', ";
+              }
+            }
+          }
+          keys = keys.slice(0, -2);
+          values = values.slice(0, -2);
+
+          var postObj = {
+            "keys": keys,
+            "values": values,
+            "geometry": JSON.stringify(preObject.CG_GEOMETRY)
+          };
+
+          console.log(postObj);
+
+          $.ajax({
+            type: "POST",
+            url: '/api/post/',
+            dataType: "json",
+            data: postObj
+          }).done(function (){
+
+            $.ajax({
+                type: "GET",
+                url: '/api/latest/',
+                dataType: "json"
+            }).done(function (res) {
+                console.log(res);
+                var wkt = new Wkt.Wkt();
+                map.removeLayer(e.layer);
+                wkt.read(JSON.stringify(json)).write();
+                json.properties.CG_ID = res;
+
+                var addLayer = eventJSON(json,
+                  {color: "#1ca8dd"},
+                  {color: "#28edca"},
+                  true
+                ).addTo(map);
+
+            }).fail(function (jqXHR, status, error) {
+                console.log("AJAX call failed: " + status + ", " + error);
+            });
+
+
+
+          }).fail(function (jqXHR, status, error){
+            console.log("AJAX call failed: " + status + ", " + error);
           });
 
         }
       }
-      this.off('mousemove', followMouse);
-      snapMarker.remove();
     });
-
-// SNAPPING
-  var road = L.geoJSON(snapLayer).addTo(map);
-
-  var snap = new L.Handler.MarkerSnap(map);
-  snap.addGuideLayer(road);
-  var snapMarker = L.marker(map.getCenter(), {
-    icon: map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
-    opacity: 1,
-    zIndexOffset: 1000
-  });
-
-  snap.watchMarker(snapMarker);
-
-  map.on('editable:vertex:dragstart', function (e) {
-    snap.watchMarker(e.vertex);
-  });
-  map.on('editable:vertex:dragend', function (e) {
-    snap.unwatchMarker(e.vertex);
-  });
-  map.on('editable:drawing:start', function () {
-    this.on('mousemove', followMouse);
-  });
-  map.on('editable:drawing:click', function (e) {
-    // Leaflet copy event data to another object when firing,
-    // so the event object we have here is not the one fired by
-    // Leaflet.Editable; it's not a deep copy though, so we can change
-    // the other objects that have a reference here.
-    var latlng = snapMarker.getLatLng();
-    e.latlng.lat = latlng.lat;
-    e.latlng.lng = latlng.lng;
-  });
-  snapMarker.on('snap', function (e) {
-    snapMarker.addTo(map);
-  });
-  snapMarker.on('unsnap', function (e) {
-    snapMarker.remove();
-  });
-  var followMouse = function (e) {
-    snapMarker.setLatLng(e.latlng);
-  };
 
   $(document).dblclick(function() {
     disableEdits();

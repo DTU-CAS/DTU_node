@@ -16,18 +16,14 @@
       });
     },
 
-    latest: function(callback){
+    latest: function(){
       $.ajax({
           type: "GET",
           url: '/api/latest/',
           dataType: "json"
       }).done(function (res) {
           console.log(res);
-          if(callback){
-            return callback(res);
-          } else {
-            return res;
-          }
+          return res;
       }).fail(function (jqXHR, status, error) {
           console.log("AJAX call failed: " + status + ", " + error);
       });
@@ -82,33 +78,61 @@
     */
     update: function(obj){
       var updateString = 'SET ';
+      var newKeys = 0;
 
       for (var key in obj) {
         if (obj.hasOwnProperty(key)) {
-          if(key !== "CG_ID" && key !== "CG_GEOMETRY"){
+          if(
+            key !== "CG_ID" &&
+            key !== "CG_GEOMETRY" &&
+            key !== "WKT" &&
+            key !== "ID"
+          ){
             updateString += key + " = '" + obj[key] + "', ";
+            newKeys += 1;
           }
         }
       }
 
-      updateString = updateString.slice(0, -2);
+      if(newKeys > 0){
+        updateString = updateString.slice(0, -2);
+      }
 
       var postObj = {
         CG_ID: obj.CG_ID,
-        request: updateString, 
+        request: updateString,
         geometry: JSON.stringify(obj.CG_GEOMETRY)
       };
 
-      $.ajax({
-        type: "POST",
-        url: '/api/update/',
-        dataType: "json",
-        data: postObj
-      }).done(function (res){
-        console.log(res);
-      }).fail(function (jqXHR, status, error){
-        console.log("AJAX call failed: " + status + ", " + error);
-      });
+      if(postObj.CG_ID === 'undefined' || postObj.CG_ID === undefined){
+        $.ajax({
+            type: "GET",
+            url: '/api/latest/',
+            dataType: "json"
+        }).done(function (res) {
+            console.log(res);
+            postObj.CG_ID = res;
+            updateDB(postObj);
+        }).fail(function (jqXHR, status, error) {
+            console.log("AJAX call failed: " + status + ", " + error);
+        });
+      }
+
+      function updateDB(object){
+        $.ajax({
+          type: "POST",
+          url: '/api/update/',
+          dataType: "json",
+          data: postObj
+        }).done(function (res){
+          console.log(res);
+        }).fail(function (jqXHR, status, error){
+          console.log("AJAX call failed: " + status + ", " + error);
+        });
+      }
+
+      updateDB(postObj);
+
     },
 
     // WRITE TO DATABASE ({ProjektID: "casper skrev det her"})
@@ -141,7 +165,6 @@
         data: postObj
       }).done(function (res){
         console.log(res);
-        console.log(db.latest());
       }).fail(function (jqXHR, status, error){
         console.log("AJAX call failed: " + status + ", " + error);
       });

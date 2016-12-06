@@ -7,7 +7,7 @@ function init(){
   // create the map
   map = L.map('map', {
     center: [55.787016, 12.522536],
-    zoom: 17,
+    zoom: 16,
     maxZoom: 21,
     minZoom: 13,
     zoomSnap: 0.5,
@@ -297,5 +297,7 @@ function init(){
   //   true
   // ).addTo(map);
 
+  // SNAPPING
+  // snapping();
   interface();
 }
