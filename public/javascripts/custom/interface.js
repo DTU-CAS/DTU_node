@@ -1,27 +1,22 @@
 function interface(){
 
-  // Hover function
-  $("#polygons").click(function(){
+  $(".addGeometry").click(function(){
     if($(this).hasClass("selected")){
       $(".selected").removeClass("selected");
-      disableEdits();
-    } else {
-      disableEdits();
-      $(".selected").removeClass("selected");
-      map.editTools.startPolygon();
-      $(this).addClass("selected");
-    }
-  });
-
-  $("#lines").click(function(){
-    if($(this).hasClass("selected")){
-      $(".selected").removeClass("selected");
+      $(".lastSelected").removeClass("lastSelected");
+      $(this).addClass("lastSelected");
       disableEdits();
     } else {
       disableEdits();
       $(".selected").removeClass("selected");
       $(this).addClass("selected");
-      map.editTools.startPolyline();
+      $(".lastSelected").removeClass("lastSelected");
+      $(this).addClass("lastSelected");
+      if($(this).attr("ref") === "adgangsvej"){
+        map.editTools.startPolyline();
+      } else {
+        map.editTools.startPolygon();
+      }
     }
   });
 
@@ -111,37 +106,31 @@ function interface(){
     }
   });
 
-  map.on('keypress', function(e) {
-    if (e.originalEvent.keyCode === 189){ // ½
-       enableEdits();
-     } else if (e.originalEvent.keyCode === 49){ // Number: 1
-       $("#polygons").click();
-     } else if (e.originalEvent.keyCode === 50){ // Number: 2
-       $("#lines").click();
-     } else if (e.originalEvent.keyCode === 51){ // Number: 3
-       $("#markers").click();
-     }
-  })
-    .on('editable:editing', function (e) {
-      // change style
-    })
-    .on('editable:created', function (e) {
-      // e.layer.options.editable = true;
-      // reverse style
-    })
-    .on('editable:drawing:end', function (e){
+  $(document).dblclick(function() {
+    disableEdits();
+    $(".selected").removeClass("selected");
+  });
+
+  map.on('editable:drawing:end', function (e){
       if(e.layer._parts){
         if(e.layer._parts.length > 0){
           var json = e.layer.toGeoJSON();
+          var projektType = $(".lastSelected").attr("ref");
+          var projektFelter = getFields(projektType);
+
           json.properties = {
-            "ProjektID": QueryString().ID
-            // "WKT": wkt.read(JSON.stringify(json)).write()
+            "ProjektID": QueryString().ID,
+            "Type": projektType
           };
+
+          for (var key1 in projektFelter) {
+            if (projektFelter.hasOwnProperty(key1)) {
+              json.properties[key1] = projektFelter[key1];
+            }
+          }
 
           var preObject = {
             CG_GEOMETRY: json.geometry,
-            Projektleder: "Casper",
-            Status: "Påbegyndt",
             ProjektID: json.properties.ProjektID
           };
 
@@ -163,8 +152,6 @@ function interface(){
             "values": values,
             "geometry": JSON.stringify(preObject.CG_GEOMETRY)
           };
-
-          console.log(postObj);
 
           $.ajax({
             type: "POST",
@@ -190,31 +177,17 @@ function interface(){
                   true
                 ).addTo(map);
 
+                console.log($(".lastSelected").attr("ref"));
+
             }).fail(function (jqXHR, status, error) {
                 console.log("AJAX call failed: " + status + ", " + error);
             });
 
 
-
           }).fail(function (jqXHR, status, error){
             console.log("AJAX call failed: " + status + ", " + error);
           });
-
         }
       }
     });
-
-  $(document).dblclick(function() {
-    disableEdits();
-    $(".selected").removeClass("selected");
-  });
-
-  var deleteShape = function (e) {
-    if ((e.originalEvent.ctrlKey || e.originalEvent.metaKey) && this.editEnabled()) this.editor.deleteShapeAt(e.latlng);
-  };
-
-  map.on('layeradd', function (e) {
-    if (e.layer instanceof L.Path) e.layer.on('click', L.DomEvent.stop).on('click', deleteShape, e.layer);
-  });
-
 }

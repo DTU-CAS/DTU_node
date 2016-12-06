@@ -53,7 +53,6 @@ function GML2GeoJSON(gml, convert){
           }
       }
 
-
     return arr_cs;
   }
 

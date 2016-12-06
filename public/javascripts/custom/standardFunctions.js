@@ -49,3 +49,97 @@ function arr2bounds(arr, reverse){
     );
   }
 }
+
+/*
+   * Workaround for 1px lines appearing in some browsers due to fractional transforms
+   * and resulting anti-aliasing.
+   * https://github.com/Leaflet/Leaflet/issues/3575
+*/
+(function(){
+    var originalInitTile = L.GridLayer.prototype._initTile;
+    L.GridLayer.include({
+        _initTile: function (tile) {
+            originalInitTile.call(this, tile);
+            var tileSize = this.getTileSize();
+            tile.style.width = tileSize.x + 1 + 'px';
+            tile.style.height = tileSize.y + 1 + 'px';
+        }
+    });
+})();
+
+function getFields(string, type){
+
+  if(string === "byggeri"){
+    if(type === "type"){
+      return [
+        "Aflevering",
+        "Anlæg",
+        "Byggeprojekt",
+        "Byggeplads hegn",
+        "Bygning under opførelse",
+        "Bygning under ombyg/ renovering",
+        "Bygning under nedrivning",
+        "Drift/ commisioning",
+        "Forberedende arbejde/ drift",
+        "Installationer/ komplettering",
+        "Jordarbejder/ fundering",
+        "Midlertidig bygning",
+        "Ombygning/renovering",
+        "Oplag",
+        "Råhus",
+        "Skurby",
+        "Udførelse",
+        "Udgravning"
+      ];
+    } else {
+      return {
+        "Navn": null,
+        "Type": null,
+        "Byggestart": null,
+        "Afleveringsdato": null,
+        "Projektleder": null,
+        "Status": null
+      };
+    }
+  } else if (string === "byggeplads"){
+    return {
+      "Navn": null,
+      "Type": "Byggeplads",
+      "Byggestart": null,
+      "Afleveringsdato": null,
+      "Projektleder": null,
+      "Status": null
+    };
+  } else if (string === "adgangsvej"){
+    if(type === "type"){
+      return [
+        "Tung trafik",
+        "Midlertidig gangsti",
+        "Lukket for gennemkørsel"
+      ];
+    }
+    return {
+      "Navn": null,
+      "Type": null,
+      "Startdato": null,
+      "Slutdato": null,
+      "Status": null
+    };
+  } else if (string === "parkering"){
+    if(type === "type"){
+      return [
+        "Parkering",
+        "Materialelager"
+      ];
+    }
+      return {
+        "Navn": null,
+        "Type": null,
+        "Startdato": null,
+        "Slutdato": null,
+        "Projektleder": null,
+        "P_pladser": null,
+        "Status": null
+      };
+    }
+}
