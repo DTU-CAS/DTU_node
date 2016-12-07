@@ -95,8 +95,31 @@ function interface(){
       if(layer.editor){
         if(layer.editor._enabled === true){
           layer.toggleEdit();
+
+          $("#infoTable > tr > td[type='key']").each(function() {
+           if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
+             layer.feature.properties[$(this).attr("ref")] = null;
+           } else {
+             layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
+           }
+          });
+
+          if(layer.feature){
+            var updateObj = {};
+            for(var key in layer.feature.properties){
+             if (layer.feature.properties.hasOwnProperty(key)) {
+               if(layer.feature.properties[key] !== null){
+                 updateObj[key] = layer.feature.properties[key];
+               }
+             }
+            }
+            updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
+
+            db.update(updateObj);
+          }
        }}
     });
+    $(".infoEdit").remove();
   }
 
   $("#map").keyup(function(e){
@@ -131,7 +154,8 @@ function interface(){
 
           var preObject = {
             CG_GEOMETRY: json.geometry,
-            ProjektID: json.properties.ProjektID
+            ProjektID: json.properties.ProjektID,
+            Type: json.properties.Type
           };
 
           var keys = '';
@@ -170,14 +194,13 @@ function interface(){
                 map.removeLayer(e.layer);
                 wkt.read(JSON.stringify(json)).write();
                 json.properties.CG_ID = res;
+                json.properties.Type = projektType;
 
                 var addLayer = eventJSON(json,
                   {color: "#1ca8dd"},
                   {color: "#28edca"},
                   true
                 ).addTo(map);
-
-                console.log($(".lastSelected").attr("ref"));
 
             }).fail(function (jqXHR, status, error) {
                 console.log("AJAX call failed: " + status + ", " + error);

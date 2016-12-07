@@ -95,8 +95,8 @@ function getFields(string, type){
       return {
         "Navn": null,
         "Type": null,
-        "Byggestart": null,
-        "Afleveringsdato": null,
+        "Startdato": null,
+        "Slutdato": null,
         "Projektleder": null,
         "Status": null
       };
@@ -105,8 +105,8 @@ function getFields(string, type){
     return {
       "Navn": null,
       "Type": "Byggeplads",
-      "Byggestart": null,
-      "Afleveringsdato": null,
+      "Startdato": null,
+      "Slutdato": null,
       "Projektleder": null,
       "Status": null
     };

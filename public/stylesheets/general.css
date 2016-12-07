@@ -381,3 +381,17 @@ html, body{
     display: none;
   }
 }
+.infoEdit{
+  position: absolute;
+  height: auto;
+  display: block;
+  z-index: 900;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  margin: 10px;
+  background: #252830;
+  color: #fff;
+  font-size: smaller;
+  padding: 10px;
+}
