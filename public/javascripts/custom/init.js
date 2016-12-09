@@ -78,16 +78,15 @@ function init(){
     }
   });
 
-  var layerContainer = $("<div class='layer-container'></div>");
   var layerList = $("<ul class='layer-list'></ul>");
 
   var wmsLayers = [
-    ["6832", "Byggepladser"],
-    ["6834", "Parkering"],
-    ["6831", "Adgangsveje"],
-    ["6833", "Ombyg og Renovering"],
-    ["7418", "Nybyg"],
-    ["7428", "Byggeri"],
+    // ["6832", "Byggepladser"],
+    // ["6834", "Parkering"],
+    // ["6831", "Adgangsveje"],
+    // ["6833", "Ombyg og Renovering"],
+    // ["7418", "Nybyg"],
+    // ["7428", "Byggeri"],
     ["18454", "Streetfood"]
   ];
   function addWMSlayer(string, name){
@@ -117,90 +116,12 @@ function init(){
         map.addLayer(layer);
       }
     });
-    $(layerList).append(listItem);
+    $("#layers").append(listItem);
   }
   for(var wms = 0; wms < wmsLayers.length; wms++){
     addWMSlayer(wmsLayers[wms][0], wmsLayers[wms][1]);
   }
-  $(layerContainer).append(layerList);
-  $("#wmsLayers").append(layerContainer);
 
-  function addGFI(e){
-    var layerString = "";
-    for (var j = 0; j < wmsLayers.length; j++){
-      layerString+= wmsLayers[j][0];
-      if(j !== wmsLayers.length -1){
-        layerString+= ",";
-      }
-    }
-
-    var latLng = e.latlng;
-    var point = map.latLngToContainerPoint(latLng, map.getZoom());
-    var size = map.getSize();
-
-    // convert boundbox to srs
-    var WGS84Param = proj4("EPSG:4326");
-    var coordinateSystem = proj4(epsg["25832"]);
-    var bbox = bounds2Arr(map.getBounds(), true);
-    bbox[0] = proj4(WGS84Param, coordinateSystem, bbox[0]);
-    bbox[1] = proj4(WGS84Param, coordinateSystem, bbox[1]);
-    bbox = arr2bounds(bbox, true).toBBoxString();
-
-    var layerURL = "http://services.nirasmap.niras.dk/kortinfo/services/Wms.ashx?";
-    var params = {
-      site: 'Provider',
-      page: 'DTU',
-      request: 'GetFeatureInfo',
-      userName: 'DTUView',
-      password: 'Bruger12',
-      service: 'WMS',
-      version: '1.1.1',
-      layers: "6832, 6834, 6831",
-      styles: "",
-      srs: 'EPSG:25832',
-      bbox: bbox,
-      width: size.x,
-      height: size.y,
-      query_layers: "6832, 6834, 6831",
-      x: point.x,
-      y: point.y,
-      type: 'nirasmap',
-      feature_count: 1,
-      info_format: 'text/xml'
-    };
-
-    var content = layerURL + L.Util.getParamString(params, layerURL, true);
-
-    $.ajax({url: content, success: function(result){
-      var fields = result.getElementsByTagName("field");
-
-      if(fields.length > 0){
-        var tableContent = "<table>";
-        for(var i = 0; i < fields.length; i++){
-          tableContent +=
-          "<tr class='table-row'>" +
-          "<td>" + $(fields[i]).attr("name") + "</td>" +
-          "<td>" + fields[i].innerHTML + "</td>";
-        }
-        tableContent += "</table>";
-
-        L.popup({ maxWidth: "600px"})
-          .setLatLng(latLng)
-          .setContent(tableContent)
-          .openOn(map);
-      }
-    }});
-  }
-
-  $("#getFeatureInfo").click(function(e){
-    if($(this).hasClass("off")){
-      $(this).removeClass("off").addClass("on");
-      map.on('click', addGFI);
-    } else {
-      $(this).removeClass("on").addClass("off");
-      map.off('click', addGFI);
-    }
-  });
 
   function addWfsLayer(string, name, style, highlight, editable){
     var wfsBase = "http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?";
@@ -261,24 +182,12 @@ function init(){
     {color: "#f4e633"},
     false
   );
-  // addWfsLayer("ugis:T6828", "Byggeri",
-  //   {},
-  //   {},
-  //   false
-  // );
   // addWfsLayer("ugis:T7418", "Nybyggeri",
   //   {color: "#e3a446"},
   //   {color: "#ffc062"},
   //   false
   // );
-  // addWfsLayer("ugis:T18454", "Streetfood");
 
-  // Start loading geometry and attributes from MSSQL server with ID
-  // var startLayer = eventJSON(json1,
-  //   {color: "#1ca8dd"},
-  //   {color: "#28edca"},
-  //   true
-  // ).addTo(map);
 
   // SNAPPING
   // snapping();
