@@ -2,7 +2,7 @@
 function init(){
   // Query the URL for parameters
   var query = QueryString();
-  if(query){jQuery("#bygID > p").text(query.ID);}
+  if(query){jQuery("#bygID > p").text(query.NAME);}
 
   // create the map
   map = L.map('map', {
@@ -78,115 +78,151 @@ function init(){
     }
   });
 
-  var layerList = $("<ul class='layer-list'></ul>");
-
-  var wmsLayers = [
-    // ["6832", "Byggepladser"],
-    // ["6834", "Parkering"],
-    // ["6831", "Adgangsveje"],
-    // ["6833", "Ombyg og Renovering"],
-    // ["7418", "Nybyg"],
-    // ["7428", "Byggeri"],
-    ["18454", "Streetfood"]
-  ];
-  function addWMSlayer(string, name){
-    var layer = L.tileLayer.wms("http://services.nirasmap.niras.dk/kortinfo/services/Wms.ashx?", {
-      site: 'Provider',
-      page: 'DTU',
-      userName: 'DTUView',
-      password: 'Bruger12',
-      loginType: "KortInfo",
-      service: 'WMS',
-      version: "1.1.1",
-      layers: string,
-      transparent: true,
-      format: 'image/png',
-      maxZoom: 21,
-      maxNativeZoom: 18,
-      attribution: '&copy; <a href="http://DTU.dk">Danish Technical University</a>'
-    });
-
-    var listItem = $("<li class='unselectable-text layer layer-off'>" + name + "</li>");
-    listItem.on("click", function(){
-      if($(this).hasClass("layer-on")){
-        $(this).removeClass("layer-on").addClass("layer-off");
-        map.removeLayer(layer);
-      } else {
-        $(this).addClass("layer-on").removeClass("layer-off");
-        map.addLayer(layer);
-      }
-    });
-    $("#layers").append(listItem);
-  }
-  for(var wms = 0; wms < wmsLayers.length; wms++){
-    addWMSlayer(wmsLayers[wms][0], wmsLayers[wms][1]);
-  }
-
-
-  function addWfsLayer(string, name, style, highlight, editable){
-    var wfsBase = "http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?";
-    var wfsParams = {
-      Site: 'Provider',
-      Page: 'DTU',
-      UserName: 'DTUedit',
-      Password: 'Rette37g',
-      Service: 'WFS',
-      Request: 'GetFeature',
-      Typename: string,
-      Srsname: 'EPSG:3857',
-    };
-    var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true);
-
-    $.ajax({url: wfsRequest, success: function(result){
-      var geom = GML2GeoJSON(result, true);
-      var layer = eventJSON(geom, style, highlight, editable);
-      layer.eachLayer(function(layer){
-        layer.options.editable = false;
-        // console.log(layer);
-      });
-
-      var listItem = $("<li class='unselectable-text layer layer-off'><p>" + name + "</p></li>")
-        .on("click", function(){
-          if($(this).hasClass("layer-on")){
-            $(this).removeClass("layer-on").addClass("layer-off");
-            map.removeLayer(layer);
-          } else {
-            $(this).removeClass("layer-off").addClass("layer-on");
-            map.addLayer(layer);
-          }
-        });
-      $("#layers").append(listItem);
-    }});
-  }
+  addWMSlayer("18454", "Streetfood");
 
   addWfsLayer("ugis:T6832", "Byggepladser",
-    {color: "#e64759"},
-    {color: "#fb6c6c"},
-    false
+    {
+      color: "#00CCFF",
+      fillOpacity: 0
+    },
+    {
+      color: "#42C9FF",
+      fillOpacity: 0
+    },
+      false
   );
   addWfsLayer("ugis:T6834", "Parkering",
-    {color: "#1bc98e"},
-    {color: "#64f4b7"},
-    false
+    {
+      color: "#65CAFE",
+      opacity: 0,
+      fillOpacity: 0.60
+    },
+    {
+      color: "#99DEFC",
+      opacity: 0,
+      fillOpacity: 0.70
+    },
+      false
   );
   addWfsLayer("ugis:T6831", "Adgangsveje",
-    {color: "#9f86ff"},
-    {color: "#ab97fb",
+    {color: "#FF33FF",
+     dashArray: "5, 5",
+    },
+    {color: "#FF78ED",
      dashArray: "5, 5",
      weight: 4,
    },
-   false
+     false
   );
   addWfsLayer("ugis:T6833", "Ombyg og Renovering",
-    {color: "#e4d836"},
-    {color: "#f4e633"},
+    {
+      color: "#000",
+      weight: 1.5,
+      fillOpacity: 0.15,
+      fillColor: "#FF00CC"
+    },
+    {
+      color: "#000",
+      weight: 2,
+      fillOpacity: 0.25,
+      fillColor: "#FF30C9"
+    },
+      false
+  );
+  addWfsLayer("ugis:T7418", "Nybyggeri",
+  {
+    color: "#000",
+    weight: 1.5,
+    fillOpacity: 0.15,
+    fillColor: "#FF9900"
+  },
+  {
+    color: "#000",
+    weight: 2,
+    fillOpacity: 0.25,
+    fillColor: "#FFB626"
+  },
     false
   );
-  // addWfsLayer("ugis:T7418", "Nybyggeri",
-  //   {color: "#e3a446"},
-  //   {color: "#ffc062"},
+  // addWfsLayer("ugis:T20047", "DTU-Bygninger",
+  // {
+  //   color: "#000",
+  //   weight: 1.5,
+  //   fillOpacity: 0.5,
+  //   fillColor: "#313034"
+  // },
+  // {
+  //   color: "#000",
+  //   weight: 2,
+  //   fillOpacity: 0.60,
+  //   fillColor: "#403f45"
+  // },
   //   false
   // );
+
+  var dtuByg = L.geoJSON(dtu_bygninger, {
+    style: {
+      color: "#000",
+      weight: 1.5,
+      fillColor: "#333",
+      fillOpacity: 0.35
+    }
+  });
+  var labels = L.layerGroup();
+  dtuByg.eachLayer(function(layer){
+
+    var properties = layer.feature.properties;
+    var bygnr = properties.DTUbygnnr;
+    var afsnit = properties.Afsnit;
+
+    var postStr = "Bygning " + bygnr;
+    if(afsnit !== null && afsnit !== 0){
+      postStr += ", " + afsnit;
+    }
+
+    if (bygnr !== null){
+      // layer.bindTooltip(postStr, {
+      //   permanent: false
+      // });
+
+      var marker = L.marker(
+        layer.getBounds().getCenter(),
+        {opacity: 0}
+      )
+        .bindTooltip(postStr, {
+          permanent: true,
+          offset: [0, 25]
+        })
+        .openTooltip();
+
+        labels.addLayer(marker);
+    }
+  });
+
+  var listItem;
+  listItem = $("<li class='unselectable-text layer layer-off'><p>" + "Bygninger" + "</p></li>")
+    .on("click", function(){
+      if($(this).hasClass("layer-on")){
+        $(this).removeClass("layer-on").addClass("layer-off");
+        map.removeLayer(dtuByg);
+      } else {
+        $(this).removeClass("layer-off").addClass("layer-on");
+        map.addLayer(dtuByg);
+      }
+    });
+  $("#layers").append(listItem);
+
+  listItem = $("<li class='unselectable-text layer layer-off'><p>" + "Bygninger - Labels" + "</p></li>")
+    .on("click", function(){
+      if($(this).hasClass("layer-on")){
+        $(this).removeClass("layer-on").addClass("layer-off");
+        map.removeLayer(labels);
+      } else {
+        $(this).removeClass("layer-off").addClass("layer-on");
+        map.addLayer(labels);
+      }
+    });
+  $("#layers").append(listItem);
 
 
   // SNAPPING

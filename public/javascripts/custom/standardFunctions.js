@@ -50,6 +50,161 @@ function arr2bounds(arr, reverse){
   }
 }
 
+function eventJSON(geoJSON, style, highlight, editable){
+  var eventLayer = L.geoJSON(geoJSON, {"style": style})
+    .on('click', function(e){
+
+      var layer = this.getLayer(e.layer._leaflet_id),
+          feature = layer.feature,
+          latLng = e.latlng;
+          edit = editable;
+
+      map.panTo(latLng);
+
+      if($(".infoEdit").length > 0){
+        $("#infoTable > tr > td[type='key']").each(function() {
+          console.log($(this).text());
+         if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
+           layer.feature.properties[$(this).attr("ref")] = null;
+         } else {
+           layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
+         }
+       });
+     }
+
+     L.popup({closeButton: false})
+     .setLatLng(latLng)
+     .setContent(infoPanel(feature.properties, edit))
+     .openOn(map);
+
+     $(".leaflet-popup").css("width", "284px");
+
+    if(edit === true){
+     if(layer.editEnabled() === true){
+       $("#editGeom").removeClass("disabled-edit").addClass("enabled-edit");
+       $("#editGeom").first().text("Gem geometri");
+     }
+
+      $("#editGeom").click(function(e){
+        if($(this).hasClass("disabled-edit")){
+          layer.enableEdit();
+          $(this).removeClass("disabled-edit").addClass("enabled-edit");
+          $(this).first().text("Gem geometri");
+          map.closePopup();
+          editPanel(feature);
+        } else {
+          layer.toggleEdit();
+          $(this).removeClass("enabled-edit").addClass("disabled-edit");
+          $(this).first().text("Rediger");
+
+          $("#infoTable > tr > td[type='key']").each(function() {
+           if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
+             layer.feature.properties[$(this).attr("ref")] = null;
+           } else {
+             layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
+           }
+         });
+
+          var updateObj = {};
+          for(var key in layer.feature.properties){
+           if (layer.feature.properties.hasOwnProperty(key)) {
+             if(layer.feature.properties[key] !== null){
+               updateObj[key] = layer.feature.properties[key];
+             }
+           }
+          }
+          updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
+
+          db.update(updateObj);
+          $(".infoEdit").remove();
+        }
+      });
+
+      $("#deleteGeom").click(function(){
+        map.removeLayer(layer);
+        map.closePopup();
+        db.delete("ALL", layer.feature.properties.CG_ID);
+      });
+    }
+  })
+  .on('mouseover', function(e){
+    var feature = this.getLayer(e.layer._leaflet_id);
+    feature.setStyle(highlight);
+  })
+  .on('mouseout', function(e){
+    var feature = this.getLayer(e.layer._leaflet_id);
+    feature.setStyle(style);
+  });
+
+ return eventLayer;
+}
+
+function addWMSlayer(string, name){
+  var layer = L.tileLayer.wms("http://services.nirasmap.niras.dk/kortinfo/services/Wms.ashx?", {
+    site: 'Provider',
+    page: 'DTU',
+    userName: 'DTUView',
+    password: 'Bruger12',
+    loginType: "KortInfo",
+    service: 'WMS',
+    version: "1.1.1",
+    layers: string,
+    transparent: true,
+    format: 'image/png',
+    maxZoom: 21,
+    maxNativeZoom: 18,
+    attribution: '&copy; <a href="http://DTU.dk">Danish Technical University</a>'
+  });
+
+  var listItem = $("<li class='unselectable-text layer layer-off'>" + name + "</li>");
+  listItem.on("click", function(){
+    if($(this).hasClass("layer-on")){
+      $(this).removeClass("layer-on").addClass("layer-off");
+      map.removeLayer(layer);
+    } else {
+      $(this).addClass("layer-on").removeClass("layer-off");
+      map.addLayer(layer);
+    }
+  });
+  $("#layers").append(listItem);
+}
+
+function addWfsLayer(string, name, style, highlight, editable){
+  var wfsBase = "http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?";
+  var wfsParams = {
+    Site: 'Provider',
+    Page: 'DTU',
+    UserName: 'DTUedit',
+    Password: 'Rette37g',
+    Service: 'WFS',
+    Request: 'GetFeature',
+    Typename: string,
+    Srsname: 'EPSG:3857',
+  };
+  var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true);
+
+  $.ajax({url: wfsRequest, success: function(result){
+    var geom = GML2GeoJSON(result, true);
+    var layer = eventJSON(geom, style, highlight, editable);
+    layer.eachLayer(function(layer){
+      layer.options.editable = false;
+      // console.log(layer);
+    });
+
+    var listItem = $("<li class='unselectable-text layer layer-off'><p>" + name + "</p></li>")
+      .on("click", function(){
+        if($(this).hasClass("layer-on")){
+          $(this).removeClass("layer-on").addClass("layer-off");
+          map.removeLayer(layer);
+        } else {
+          $(this).removeClass("layer-off").addClass("layer-on");
+          map.addLayer(layer);
+        }
+      });
+    $("#layers").append(listItem);
+  }});
+}
+
 function addGFI(e){
   var layerString = "";
   for (var j = 0; j < wmsLayers.length; j++){

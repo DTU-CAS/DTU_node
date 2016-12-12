@@ -3,105 +3,16 @@
  * Author: NIRAS - Casper Fibæk
  */
 
- function eventJSON(geoJSON, style, highlight, editable){
-   var eventLayer = L.geoJSON(geoJSON, {"style": style})
-     .on('click', function(e){
-
-       var layer = this.getLayer(e.layer._leaflet_id),
-           feature = layer.feature,
-           latLng = e.latlng;
-           edit = editable;
-
-       map.panTo(latLng);
-
-       if($(".infoEdit").length > 0){
-         $("#infoTable > tr > td[type='key']").each(function() {
-           console.log($(this).text());
-          if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
-            layer.feature.properties[$(this).attr("ref")] = null;
-          } else {
-            layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
-          }
-        });
-      }
-
-      L.popup({closeButton: false})
-      .setLatLng(latLng)
-      .setContent(infoPanel(feature.properties, edit))
-      .openOn(map);
-
-      $(".leaflet-popup").css("width", "284px");
-
-     if(edit === true){
-      if(layer.editEnabled() === true){
-        $("#editGeom").removeClass("disabled-edit").addClass("enabled-edit");
-        $("#editGeom").first().text("Gem geometri");
-      }
-
-       $("#editGeom").click(function(e){
-         if($(this).hasClass("disabled-edit")){
-           layer.enableEdit();
-           $(this).removeClass("disabled-edit").addClass("enabled-edit");
-           $(this).first().text("Gem geometri");
-           map.closePopup();
-           editPanel(feature);
-         } else {
-           layer.toggleEdit();
-           $(this).removeClass("enabled-edit").addClass("disabled-edit");
-           $(this).first().text("Rediger");
-
-           $("#infoTable > tr > td[type='key']").each(function() {
-            if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
-              layer.feature.properties[$(this).attr("ref")] = null;
-            } else {
-              layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
-            }
-          });
-
-           var updateObj = {};
-           for(var key in layer.feature.properties){
-            if (layer.feature.properties.hasOwnProperty(key)) {
-              if(layer.feature.properties[key] !== null){
-                updateObj[key] = layer.feature.properties[key];
-              }
-            }
-           }
-           updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
-
-           db.update(updateObj);
-           $(".infoEdit").remove();
-         }
-       });
-
-       $("#deleteGeom").click(function(){
-         map.removeLayer(layer);
-         map.closePopup();
-         db.delete("ALL", layer.feature.properties.CG_ID);
-       });
-     }
-   })
-   .on('mouseover', function(e){
-     var feature = this.getLayer(e.layer._leaflet_id);
-     feature.setStyle(highlight);
-   })
-   .on('mouseout', function(e){
-     var feature = this.getLayer(e.layer._leaflet_id);
-     feature.setStyle(style);
-   });
-
-  return eventLayer;
- }
-
  function editPanel(feature){
    console.log(feature);
    $("#interface").prepend("<div class='infoEdit'><table id='infoTable'></table></div>");
    var tr = $("<table class='attributes'></table>");
    for (var key in feature.properties) {
      if (feature.properties.hasOwnProperty(key)) {
-       if(key !== "CG_ID" &&
-          key !== "ProjektID" &&
-          key.indexOf("label") === -1 &&
-          key.indexOf("Label") === -1){
+       // What should be editable
+       if(key === "Type" ||
+          key === "Navn" ||
+          key === "Status"){
          $("#infoTable").append("<tr><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='true'>" + String(feature.properties[key] + "</td></tr>"));
        }
      }

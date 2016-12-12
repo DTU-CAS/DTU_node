@@ -9,9 +9,8 @@ function interface(){
     } else {
       disableEdits();
       $(".selected").removeClass("selected");
-      $(this).addClass("selected");
       $(".lastSelected").removeClass("lastSelected");
-      $(this).addClass("lastSelected");
+      $(this).addClass("selected").addClass("lastSelected");
       if($(this).attr("ref") === "adgangsvej"){
         map.editTools.startPolyline();
       } else {

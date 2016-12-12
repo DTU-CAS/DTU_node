@@ -27,6 +27,29 @@
   opacity: 0.8;
 }
 
+.leaflet-tooltip{
+  background-color: #252830 !important;
+  border-radius: 0 !important;
+  border: none !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  font-size: 1em !important;
+}
+
+.leaflet-tooltip-top:before{
+  border-top-color: #252830 !important;
+}
+
+.leaflet-tooltip-bottom:before{
+  border-bottom-color: #252830 !important
+}
+.leaflet-tooltip-left:before{
+  border-left-color: #252830 !important;
+}
+.leaflet-tooltip-right:before{
+  border-right-color: #252830 !important;
+}
+
 .leaflet-popup-content-wrapper{
   border-radius: 0 !important;
 }
