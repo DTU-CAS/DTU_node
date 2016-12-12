@@ -1,8 +1,7 @@
-function snapping(){
-  var road = L.geoJSON(snapLayer).addTo(map);
-  var snap = new L.Handler.MarkerSnap(map);
+function snapping(layer){
+  snap = new L.Handler.MarkerSnap(map);
 
-  snap.addGuideLayer(road);
+  snap.addGuideLayer(layer);
   var snapMarker = L.marker(map.getCenter(), {
     icon: map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
     opacity: 1,
@@ -37,4 +36,12 @@ function snapping(){
   var followMouse = function (e) {
     snapMarker.setLatLng(e.latlng);
   };
+
+  $("#snapping").click(function(){
+    if($(this).hasClass("on")){
+      snap.disable();
+    } else {
+      snap.enable();
+    }
+  });
 }

@@ -78,8 +78,6 @@ function init(){
     }
   });
 
-  addWMSlayer("18454", "Streetfood");
-
   addWfsLayer("ugis:T6832", "Byggepladser",
     {
       color: "#00CCFF",
@@ -199,33 +197,12 @@ function init(){
     }
   });
 
-  var listItem;
-  listItem = $("<li class='unselectable-text layer layer-off'><p>" + "Bygninger" + "</p></li>")
-    .on("click", function(){
-      if($(this).hasClass("layer-on")){
-        $(this).removeClass("layer-on").addClass("layer-off");
-        map.removeLayer(dtuByg);
-      } else {
-        $(this).removeClass("layer-off").addClass("layer-on");
-        map.addLayer(dtuByg);
-      }
-    });
-  $("#layers").append(listItem);
+  add2LayerList("Bygninger", dtuByg);
+  add2LayerList("Bygninger - Labels", labels);
 
-  listItem = $("<li class='unselectable-text layer layer-off'><p>" + "Bygninger - Labels" + "</p></li>")
-    .on("click", function(){
-      if($(this).hasClass("layer-on")){
-        $(this).removeClass("layer-on").addClass("layer-off");
-        map.removeLayer(labels);
-      } else {
-        $(this).removeClass("layer-off").addClass("layer-on");
-        map.addLayer(labels);
-      }
-    });
-  $("#layers").append(listItem);
-
+  addWMSlayer("18454", "Streetfood");
 
   // SNAPPING
-  // snapping();
+  snapping(dtuByg);
   interface();
 }

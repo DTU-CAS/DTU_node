@@ -75,6 +75,15 @@ html, body{
   margin-left: 18px;
 }
 
+#editButtons > .title{
+  background: #10b47b;
+  margin: 0;
+  margin-right: -4px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #fff;
+}
+
 .main{
   position: relative;
   z-index: 9001;
@@ -122,8 +131,8 @@ html, body{
   -webkit-transition: all .1s;
   border-bottom: 2px solid #1f2025;
   box-sizing: border-box;
--moz-box-sizing: border-box;
--webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
 }
 
 .menu-selected{
@@ -165,7 +174,8 @@ html, body{
 #editButtons > div:hover,
 #editGeom:hover,
 #deleteGeom:hover,
-#addCollumn:hover{
+#addCollumn:hover,
+#copyGeom:hover{
   transition: all .15s ease-in-out;
   -moz-transition: all .15s ease-in-out;
   -webkit-transition: all .15s;
@@ -175,7 +185,8 @@ html, body{
 
 #editGeom,
 #deleteGeom,
-#addCollumn{
+#addCollumn,
+#copyGeom{
   background: #434857;
   padding: 6px;
   width: 100px;
@@ -196,6 +207,10 @@ html, body{
   margin-bottom: 4px;
 }
 
+#copyGeom{
+  margin-top: 10px;
+}
+
 #addCollumn{
   margin-top: 10px;
   margin-bottom: 4px;
@@ -204,7 +219,8 @@ html, body{
 
 #deleteGeom > p,
 #addCollumn > p,
-#editGeom > p{
+#editGeom > p,
+#copyGeom > p{
   margin: 0;
 }
 
@@ -246,7 +262,7 @@ html, body{
   background: #e64759 !important;
 }
 .on, .layer-on{
-  background: #1bc98e !important;
+  background: #10b47b !important;
 }
 
 .layer-off{
@@ -317,7 +333,7 @@ html, body{
 }
 
 .selected{
-  background: #1ca8dd !important;
+  background: #208eb8 !important;
 }
 
 .unselectable{

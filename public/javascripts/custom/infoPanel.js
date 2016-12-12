@@ -40,7 +40,10 @@ function infoPanel(obj, edit){
   }
 
   if(edit === false){
-    table += "</table></div>";
+    table +=
+    "</table>" + "<div id='popup-button-wrap'>" +
+        "<div id='copyGeom' class='disabled-edit unselectable-text'><p>Kopier<i class='fa fa-copy table-edit' aria-hidden='true'></i></p></div>" +
+    "</div>";
   } else {
       table +=
       "</table>" + "<div id='popup-button-wrap'>" +

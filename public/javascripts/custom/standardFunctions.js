@@ -50,6 +50,100 @@ function arr2bounds(arr, reverse){
   }
 }
 
+function addJSON(json, editable){
+  if(editable !== true){
+    var projektType = $(".lastSelected").attr("ref");
+    var projektFelter = getFields(projektType);
+
+    json.properties = {
+      "ProjektID": QueryString().ID,
+      "Type": projektType
+    };
+
+    for (var key1 in projektFelter) {
+      if (projektFelter.hasOwnProperty(key1)) {
+        json.properties[key1] = projektFelter[key1];
+      }
+    }
+  }
+
+  // console.log("ADDED TO addJSON: ", json);
+
+  var preObject = {
+    CG_GEOMETRY: json.geometry,
+    ProjektID: json.properties.ProjektID,
+    Type: json.properties.Type
+  };
+
+  if(json.properties.Navn && json.properties.Navn !== null){
+    preObject.Navn = json.properties.Navn;
+  }
+  if(json.properties.Status && json.properties.Status !== null){
+    preObject.Status = json.properties.Status;
+  }
+
+  var keys = '';
+  var values = '';
+  for (var key in preObject) {
+    if (preObject.hasOwnProperty(key)) {
+      if(key !== "CG_GEOMETRY"){
+        keys += key + ", ";
+        values += "'" + preObject[key] + "', ";
+      }
+    }
+  }
+  keys = keys.slice(0, -2);
+  values = values.slice(0, -2);
+
+  var postObj = {
+    "keys": keys,
+    "values": values,
+    "geometry": JSON.stringify(preObject.CG_GEOMETRY)
+  };
+
+  $.ajax({
+    type: "POST",
+    url: '/api/post/',
+    dataType: "json",
+    data: postObj
+  }).done(function (){
+
+    $.ajax({
+        type: "GET",
+        url: '/api/latest/',
+        dataType: "json"
+    }).done(function (res) {
+        console.log(res);
+        var wkt = new Wkt.Wkt();
+        wkt.read(JSON.stringify(json)).write();
+        json.properties.CG_ID = res;
+
+        var addLayer = eventJSON(json,
+          {color: "#1ca8dd"},
+          {color: "#28edca"},
+          true
+        ).addTo(map);
+
+        if(editable === true){
+          // addLayer.options.editable = true;
+          addLayer.eachLayer(function(layer){
+            if (layer instanceof L.Path){
+              if (typeof layer.editor == 'undefined'){
+                if(layer.options.editable !== false){
+                  layer.enableEdit();
+                }
+            }}
+          });
+        }
+      }).fail(function (jqXHR, status, error) {
+          console.log("AJAX call failed: " + status + ", " + error);
+      });
+    }).fail(function (jqXHR, status, error){
+      console.log("AJAX call failed: " + status + ", " + error);
+    });
+}
+
+
 function eventJSON(geoJSON, style, highlight, editable){
   var eventLayer = L.geoJSON(geoJSON, {"style": style})
     .on('click', function(e){
@@ -125,6 +219,23 @@ function eventJSON(geoJSON, style, highlight, editable){
         map.closePopup();
         db.delete("ALL", layer.feature.properties.CG_ID);
       });
+    } else {
+      $("#copyGeom").click(function(){
+        map.closePopup();
+
+        var layerCopy = layer.toGeoJSON();
+
+        layerCopy.properties = {
+          "ProjektID": QueryString().ID,
+          "Navn": layer.feature.properties.Navn,
+          "Type": layer.feature.properties.Type,
+          "Status": layer.feature.properties.Status
+        };
+
+        addJSON(layerCopy, true);
+        editPanel(layer.feature);
+
+      });
     }
   })
   .on('mouseover', function(e){
@@ -156,17 +267,7 @@ function addWMSlayer(string, name){
     attribution: '&copy; <a href="http://DTU.dk">Danish Technical University</a>'
   });
 
-  var listItem = $("<li class='unselectable-text layer layer-off'>" + name + "</li>");
-  listItem.on("click", function(){
-    if($(this).hasClass("layer-on")){
-      $(this).removeClass("layer-on").addClass("layer-off");
-      map.removeLayer(layer);
-    } else {
-      $(this).addClass("layer-on").removeClass("layer-off");
-      map.addLayer(layer);
-    }
-  });
-  $("#layers").append(listItem);
+  add2LayerList(name, layer);
 }
 
 function addWfsLayer(string, name, style, highlight, editable){
@@ -191,18 +292,23 @@ function addWfsLayer(string, name, style, highlight, editable){
       // console.log(layer);
     });
 
-    var listItem = $("<li class='unselectable-text layer layer-off'><p>" + name + "</p></li>")
-      .on("click", function(){
-        if($(this).hasClass("layer-on")){
-          $(this).removeClass("layer-on").addClass("layer-off");
-          map.removeLayer(layer);
-        } else {
-          $(this).removeClass("layer-off").addClass("layer-on");
-          map.addLayer(layer);
-        }
-      });
-    $("#layers").append(listItem);
+    add2LayerList(name, layer);
+
   }});
+}
+
+function add2LayerList(name, layer){
+  var listItem = $("<li class='unselectable-text layer layer-off'><p>" + name + "</p></li>")
+    .on("click", function(){
+      if($(this).hasClass("layer-on")){
+        $(this).removeClass("layer-on").addClass("layer-off");
+        map.removeLayer(layer);
+      } else {
+        $(this).removeClass("layer-off").addClass("layer-on");
+        map.addLayer(layer);
+      }
+    });
+  $("#layers").append(listItem);
 }
 
 function addGFI(e){

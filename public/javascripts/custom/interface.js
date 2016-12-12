@@ -136,80 +136,9 @@ function interface(){
   map.on('editable:drawing:end', function (e){
       if(e.layer._parts){
         if(e.layer._parts.length > 0){
-          var json = e.layer.toGeoJSON();
-          var projektType = $(".lastSelected").attr("ref");
-          var projektFelter = getFields(projektType);
-
-          json.properties = {
-            "ProjektID": QueryString().ID,
-            "Type": projektType
-          };
-
-          for (var key1 in projektFelter) {
-            if (projektFelter.hasOwnProperty(key1)) {
-              json.properties[key1] = projektFelter[key1];
-            }
-          }
-
-          var preObject = {
-            CG_GEOMETRY: json.geometry,
-            ProjektID: json.properties.ProjektID,
-            Type: json.properties.Type
-          };
-
-          var keys = '';
-          var values = '';
-          for (var key in preObject) {
-            if (preObject.hasOwnProperty(key)) {
-              if(key !== "CG_GEOMETRY"){
-                keys += key + ", ";
-                values += "'" + preObject[key] + "', ";
-              }
-            }
-          }
-          keys = keys.slice(0, -2);
-          values = values.slice(0, -2);
-
-          var postObj = {
-            "keys": keys,
-            "values": values,
-            "geometry": JSON.stringify(preObject.CG_GEOMETRY)
-          };
-
-          $.ajax({
-            type: "POST",
-            url: '/api/post/',
-            dataType: "json",
-            data: postObj
-          }).done(function (){
-
-            $.ajax({
-                type: "GET",
-                url: '/api/latest/',
-                dataType: "json"
-            }).done(function (res) {
-                console.log(res);
-                var wkt = new Wkt.Wkt();
-                map.removeLayer(e.layer);
-                wkt.read(JSON.stringify(json)).write();
-                json.properties.CG_ID = res;
-                json.properties.Type = projektType;
-
-                var addLayer = eventJSON(json,
-                  {color: "#1ca8dd"},
-                  {color: "#28edca"},
-                  true
-                ).addTo(map);
-
-            }).fail(function (jqXHR, status, error) {
-                console.log("AJAX call failed: " + status + ", " + error);
-            });
-
-
-          }).fail(function (jqXHR, status, error){
-            console.log("AJAX call failed: " + status + ", " + error);
-          });
-        }
+          addJSON(e.layer.toGeoJSON());
+          map.removeLayer(e.layer);
       }
-    });
+    }
+  });
 }
