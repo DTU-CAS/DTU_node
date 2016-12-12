@@ -6,6 +6,7 @@ function interface(){
       $(".lastSelected").removeClass("lastSelected");
       $(this).addClass("lastSelected");
       disableEdits();
+      edd = 0;
     } else {
       disableEdits();
       $(".selected").removeClass("selected");
@@ -16,6 +17,7 @@ function interface(){
       } else {
         map.editTools.startPolygon();
       }
+      edd = 1;
     }
   });
 
@@ -52,13 +54,6 @@ function interface(){
     }
   });
 
-  $("#snapping").click(function(){
-    if($(this).hasClass("off")){
-      $(this).removeClass("off").addClass("on");
-    } else {
-      $(this).removeClass("on").addClass("off");
-    }
-  });
 
   $(".menu-item").click(function(){
     if(!$(this).hasClass("menu-selected")){
@@ -77,6 +72,7 @@ function interface(){
   });
 
   function enableEdits(){
+    edd = 1;
     map.eachLayer(function(layer){
       // console.log(layer);
       if (layer instanceof L.Path){
@@ -89,6 +85,7 @@ function interface(){
   }
 
   function disableEdits(){
+    edd = 0;
     map.editTools.stopDrawing();
     map.eachLayer(function(layer){
       if(layer.editor){
@@ -113,7 +110,7 @@ function interface(){
              }
             }
             updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
-
+            snap.addGuideLayer(layer);
             db.update(updateObj);
           }
        }}
@@ -138,7 +135,11 @@ function interface(){
         if(e.layer._parts.length > 0){
           addJSON(e.layer.toGeoJSON());
           map.removeLayer(e.layer);
+          $(".selected").removeClass("selected");
       }
     }
+    edd = 0;
   });
+
+  snapping();
 }

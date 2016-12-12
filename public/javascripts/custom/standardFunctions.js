@@ -152,6 +152,7 @@ function eventJSON(geoJSON, style, highlight, editable){
           feature = layer.feature,
           latLng = e.latlng;
           edit = editable;
+          leafletID = e.layer._leaflet_id;
 
       map.panTo(latLng);
 
@@ -179,14 +180,23 @@ function eventJSON(geoJSON, style, highlight, editable){
        $("#editGeom").first().text("Gem geometri");
      }
 
-      $("#editGeom").click(function(e){
+      $("#editGeom").click(function(){
         if($(this).hasClass("disabled-edit")){
+          edd = 1;
+
+          for (var i = snap._guides.length - 1; i >= 0; i--) {
+            if (snap._guides[i]._leaflet_id === e.layer._leaflet_id) {
+              snap._guides.splice(i, 1);
+            }
+          }
+
           layer.enableEdit();
           $(this).removeClass("disabled-edit").addClass("enabled-edit");
           $(this).first().text("Gem geometri");
           map.closePopup();
           editPanel(feature);
         } else {
+          edd = 0;
           layer.toggleEdit();
           $(this).removeClass("enabled-edit").addClass("disabled-edit");
           $(this).first().text("Rediger");
@@ -211,6 +221,7 @@ function eventJSON(geoJSON, style, highlight, editable){
 
           db.update(updateObj);
           $(".infoEdit").remove();
+          snap.addGuideLayer(layer);
         }
       });
 
@@ -231,6 +242,8 @@ function eventJSON(geoJSON, style, highlight, editable){
           "Type": layer.feature.properties.Type,
           "Status": layer.feature.properties.Status
         };
+
+        edd = 1;
 
         addJSON(layerCopy, true);
         editPanel(layer.feature);

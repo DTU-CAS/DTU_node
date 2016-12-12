@@ -201,8 +201,5 @@ function init(){
   add2LayerList("Bygninger - Labels", labels);
 
   addWMSlayer("18454", "Streetfood");
-
-  // SNAPPING
-  snapping(dtuByg);
   interface();
 }
