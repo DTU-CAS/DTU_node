@@ -67,8 +67,6 @@ function addJSON(json, editable){
     }
   }
 
-  // console.log("ADDED TO addJSON: ", json);
-
   var preObject = {
     CG_GEOMETRY: json.geometry,
     ProjektID: json.properties.ProjektID,
@@ -158,7 +156,6 @@ function eventJSON(geoJSON, style, highlight, editable){
 
       if($(".infoEdit").length > 0){
         $("#infoTable > tr > td[type='key']").each(function() {
-          console.log($(this).text());
          if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
            layer.feature.properties[$(this).attr("ref")] = null;
          } else {

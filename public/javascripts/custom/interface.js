@@ -115,7 +115,7 @@ function interface(){
           }
        }}
     });
-    $(".infoEdit").remove();
+    $(".infoEdit, .slide-menu").remove();
   }
 
   $("#map").keyup(function(e){

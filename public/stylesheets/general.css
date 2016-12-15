@@ -288,6 +288,39 @@ html, body{
   text-align: left;
 }
 
+.slide-menu{
+  position: absolute;
+  height: auto;
+  width: 100px;
+  background: #3e4149;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  color: white;
+  left: 200px;
+  bottom: 0px;
+  z-index: 901;
+}
+
+.slide-menu > ul{
+  list-style: none;
+}
+
+.slide-menu > ul > li{
+  list-style: none;
+  margin-left: -40px;
+  padding-left: 10px;
+  font-size: small;
+  margin-bottom: 4px;
+}
+
+.slide-menu > ul > li:hover{
+  background: #1ca8dd;
+  cursor:pointer;
+}
+
+.hoverPointer{
+  cursor: pointer;
+}
+
 #bygID{
   background: #252830;
   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
@@ -310,7 +343,8 @@ html, body{
 }
 
 #snapping > p{
-  padding-left: 42px;
+  text-align:center;
+  /*padding-left: 42px;*/
 }
 #getFeatureInfo > p{
   padding-left: 26px;

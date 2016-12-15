@@ -142,30 +142,23 @@ function init(){
   },
     false
   );
-  // addWfsLayer("ugis:T20047", "DTU-Bygninger",
-  // {
-  //   color: "#000",
-  //   weight: 1.5,
-  //   fillOpacity: 0.5,
-  //   fillColor: "#313034"
-  // },
-  // {
-  //   color: "#000",
-  //   weight: 2,
-  //   fillOpacity: 0.60,
-  //   fillColor: "#403f45"
-  // },
-  //   false
-  // );
 
-  var dtuByg = L.geoJSON(dtu_bygninger, {
-    style: {
+  var dtuByg = eventJSON(dtu_bygninger,
+    {
       color: "#000",
       weight: 1.5,
       fillColor: "#333",
       fillOpacity: 0.35
-    }
-  });
+    },
+    {
+      color: "#111",
+      weight: 2,
+      fillColor: "#555",
+      fillOpacity: 0.40
+    },
+    false
+  );
+
   var labels = L.layerGroup();
   dtuByg.eachLayer(function(layer){
 

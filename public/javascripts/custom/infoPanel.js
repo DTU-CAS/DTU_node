@@ -6,17 +6,66 @@
  function editPanel(feature){
    console.log(feature);
    $("#interface").prepend("<div class='infoEdit'><table id='infoTable'></table></div>");
+
+// change this to a show/hide function
    var tr = $("<table class='attributes'></table>");
    for (var key in feature.properties) {
      if (feature.properties.hasOwnProperty(key)) {
        // What should be editable
        if(key === "Type" ||
-          key === "Navn" ||
           key === "Status"){
-         $("#infoTable").append("<tr><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='true'>" + String(feature.properties[key] + "</td></tr>"));
+         $("#infoTable").append("<tr class='editRow hoverPointer'><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='false'>" + String(feature.properties[key] + "</td></tr>"));
+       } else if (
+          key === "Navn"
+       ){
+         $("#infoTable").append("<tr class='editRow'><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='true'>" + String(feature.properties[key] + "</td></tr>"));
        }
      }
    }
+
+   $(".editRow").each(function(){
+     var row = $(this).children();
+     for(var i = 0; i < row.length; i++){
+       if($(row[i]).attr("ref") === "Status"){
+         $(row[i]).siblings().click(function(){
+           $("#interface").prepend("<div class='slide-menu'><ul></ul></div>");
+
+           $(".slide-menu > ul").append(
+             "<li>Igangsat</li>" +
+             "<li>Afsluttet</li>"
+           );
+
+           var toChange = $(this);
+
+           $(".slide-menu > ul > li").click(function(){
+             var text = $(this).text();
+             $(toChange).text(text);
+           });
+
+         });
+       } else if ($(row[i]).attr("ref") === "Type"){
+         $(row[i]).siblings().click(function(){
+           $("#interface").prepend("<div class='slide-menu'><ul></ul></div>");
+
+           $(".slide-menu > ul").append(
+             "<li>Byggeri</li>" +
+             "<li>Parkering</li>" +
+             "<li>Kina</li>" +
+             "<li>Trump</li>"
+           );
+
+           var toChange = $(this);
+
+           $(".slide-menu > ul > li").click(function(){
+             var text = $(this).text();
+             $(toChange).text(text);
+           });
+
+         });
+       }
+     }
+   });
+
  }
 
  function addRow(key, attribute){
@@ -34,7 +83,10 @@ function infoPanel(obj, edit){
          key !== "ProjektID" &&
          key.indexOf("label") === -1 &&
          key.indexOf("Label") === -1){
-        table += addRow(key, obj[key]);
+
+          // if(key !== "P_pladser" && (obj[key] === null || obj[key] === 'null')){
+            table += addRow(key, obj[key]);
+          // }
       }
     }
   }
