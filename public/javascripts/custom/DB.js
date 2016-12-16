@@ -40,7 +40,11 @@
           } else {
             console.log("Geometries added to the map: " + res.length);
             for(var i = 0; i < res.length; i++){
+              console.log(res[i]);
+
               L.geoJSON(res[i]).addTo(map);
+
+
             }
           }
       }).fail(function (jqXHR, status, error) {
@@ -127,7 +131,7 @@
         }).done(function (res){
           console.log(res);
         }).fail(function (jqXHR, status, error){
-          console.log("AJAX call failed: " + status + ", " + error);
+          console.log("AJAX call failed: ", jqXHR);
         });
       }
 

@@ -1,38 +1,10 @@
 function editPanel(feature){
-  var fields = [
-    [
-      "Byggeplads hegn",
-      "Aflevering",
-      "Anlæg",
-      "Byggeprojekt",
-      "Bygning under opførelse",
-      "Bygning under ombyg/ renovering",
-      "Bygning under nedrivning",
-      "Drift/ commisioning",
-      "Forberedende arbejde/ drift",
-      "Installationer/ komplettering",
-      "Jordarbejder/ fundering",
-      "Midlertidig bygning",
-      "Ombygning/renovering",
-      "Oplag",
-      "Råhus",
-      "Skurby",
-      "Udførelse",
-      "Udgravning"
-    ],
-    [
-      "Byggeplads"
-    ],
-    [
-      "Tung trafik",
-      "Midlertidig gangsti",
-      "Lukket for gennemkørsel"
-    ],
-    [
-      "Parkering",
-      "Materialelager"
-    ]
-  ];
+  var fields = [];
+      fields.push(getFields("byggeri"));
+      fields.push(getFields("byggeplads"));
+      fields.push(getFields("adgangsvej"));
+      fields.push(getFields("parkering"));
+  var allFields = getFields("all");
 
    $("#interface").prepend(
      "<div class='infoEdit'>" +
@@ -58,13 +30,27 @@ function editPanel(feature){
      $(".editRow").css("background", "#252830");
      $(this).css("background", "#3e4149");
      var _thisType = $("#info-Type > .attribute").text();
+     if(allFields.indexOf(_thisType) === -1){
+       _thisType = lookUp(_thisType);
+     }
      var typeList = '';
 
-     for(var i = 0; i < fields.length; i++){
-       for(var j = 0; j < fields[i].length; j++){
-         if(fields[i][j].indexOf(_thisType) !== -1){
-           for (var w = 0; w < fields[i].length; w++){
-             typeList += "<li>" + fields[i][w] + "</li>";
+     if(
+       _thisType === "undefined" ||
+       _thisType === undefined ||
+       _thisType === null ||
+       _thisType === "null"
+     ){
+       for (var q = 0; q < allFields.length; q++){
+         typeList += "<li>" + allFields[q] + "</li>";
+       }
+     } else {
+       for(var i = 0; i < fields.length; i++){
+         for(var j = 0; j < fields[i].length; j++){
+           if(fields[i][j].indexOf(_thisType) !== -1){
+             for (var w = 0; w < fields[i].length; w++){
+               typeList += "<li>" + fields[i][w] + "</li>";
+             }
            }
          }
        }

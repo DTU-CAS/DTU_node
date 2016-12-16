@@ -71,7 +71,7 @@ function addJSON(json, editable){
   var preObject = {
     CG_GEOMETRY: json.geometry,
     ProjektID: json.properties.ProjektID,
-    Type: json.properties.Type,
+    Type: lookUp(json.properties.Type),
     Navn: json.properties.Navn,
     Status: json.properties.Status
   };
@@ -139,10 +139,10 @@ function addJSON(json, editable){
           });
         }
       }).fail(function (jqXHR, status, error) {
-          console.log("AJAX call failed: " + status + ", " + error);
+          console.log("AJAX call failed: ", jqXHR);
       });
     }).fail(function (jqXHR, status, error){
-      console.log("AJAX call failed: " + status + ", " + error);
+      console.log("AJAX call failed: ", jqXHR);
     });
 }
 
@@ -180,7 +180,11 @@ function disableEdits(){
           for(var key in layer.feature.properties){
            if (layer.feature.properties.hasOwnProperty(key)) {
              if(layer.feature.properties[key] !== null){
-               updateObj[key] = layer.feature.properties[key];
+               if(key === "Type"){
+                 updateObj[key] = lookUp(layer.feature.properties[key]);
+               } else {
+                 updateObj[key] = layer.feature.properties[key];
+               }
              }
            }
           }
@@ -231,6 +235,7 @@ function eventJSON(geoJSON, style, highlight, editable){
       $("#editGeom").click(function(){
         if($(this).hasClass("disabled-edit")){
           disableEdits();
+          $(".infoEdit, .slide-menu").remove();
           edd = 1;
 
           for (var i = snap._guides.length - 1; i >= 0; i--) {
@@ -262,10 +267,15 @@ function eventJSON(geoJSON, style, highlight, editable){
           for(var key in layer.feature.properties){
            if (layer.feature.properties.hasOwnProperty(key)) {
              if(layer.feature.properties[key] !== null){
-               updateObj[key] = layer.feature.properties[key];
+               if(key === "Type"){
+                 updateObj[key] = lookUp(layer.feature.properties[key]);
+               } else {
+                 updateObj[key] = layer.feature.properties[key];
+               }
              }
            }
           }
+
           updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
 
           db.update(updateObj);
@@ -278,24 +288,39 @@ function eventJSON(geoJSON, style, highlight, editable){
         map.removeLayer(layer);
         map.closePopup();
         db.delete("ALL", layer.feature.properties.CG_ID);
+        disableEdits();
       });
     } else {
       $("#copyGeom").click(function(){
         map.closePopup();
 
         var layerCopy = layer.toGeoJSON();
+        var allFields = getFields("all");
 
         layerCopy.properties = {
           "ProjektID": QueryString().ID,
-          "Navn": layer.feature.properties.Navn,
-          "Type": layer.feature.properties.Type,
-          "Status": layer.feature.properties.Status
+          "Navn": QueryString().NAME,
         };
+
+        if(allFields.indexOf(layer.feature.properties.Type === -1)){
+          layerCopy.properties.Type = lookUp(layer.feature.properties.Type);
+        } else {
+          layerCopy.properties.Type = layer.feature.properties.Type;
+        }
+
+        if(
+          layerCopy.properties.Status === null ||
+          layerCopy.properties.Status === "null" ||
+          layerCopy.properties.Status === "undefined" ||
+          layerCopy.properties.Status === undefined
+        ){
+          layerCopy.properties.Status = getFields("status")[0];
+        }
 
         edd = 1;
 
         addJSON(layerCopy, true);
-        editPanel(layer.feature);
+        editPanel(layerCopy);
 
       });
     }
@@ -460,24 +485,10 @@ function addGFI(e){
 function getFields(string){
   if(string === "byggeri"){
       return [
-        "Byggeplads hegn",
-        "Aflevering",
         "Anlæg",
-        "Byggeprojekt",
-        "Bygning under opførelse",
-        "Bygning under ombyg/ renovering",
-        "Bygning under nedrivning",
-        "Drift/ commisioning",
-        "Forberedende arbejde/ drift",
-        "Installationer/ komplettering",
-        "Jordarbejder/ fundering",
         "Midlertidig bygning",
         "Ombygning/renovering",
-        "Oplag",
-        "Råhus",
-        "Skurby",
-        "Udførelse",
-        "Udgravning"
+        "Nybyggeri"
       ];
   } else if (string === "byggeplads"){
       return [
@@ -501,5 +512,46 @@ function getFields(string){
         "Garanti",
         "Ongoing"
       ];
+    } else if (string === "all"){
+      return [
+        "Anlæg",
+        "Midlertidig bygning",
+        "Ombygning/renovering",
+        "Nybyggeri",
+        "Byggeplads",
+        "Tung trafik",
+        "Midlertidig gangsti",
+        "Lukket for gennemkørsel",
+        "Parkering",
+        "Materialelager"
+      ];
+    } else {
+      return [];
     }
+}
+
+function lookUp(string){
+  var typeLookUp = {
+    "BYR": "Ombygning/renovering",
+    "BYM": "Midlertidig bygning",
+    "ANL": "Anlæg",
+    "BYO": "Nybyggeri",
+    "BPH": "Byggeplads",
+    "AVT": "Tung trafik",
+    "GSA": "Midlertidig gangsti",
+    "AVK": "Lukket for gennemkørsel",
+    "PKA": "Materialelager",
+    "PKH": "Parkering",
+    "Ombygning/renovering": "BYR",
+    "Midlertidig bygning": "BYM",
+    "Anlæg": "ANL",
+    "Byggeplads": "BPH",
+    "Tung trafik": "AVT",
+    "Midlertidig gangsti": "GSA",
+    "Lukket for gennemkørsel": "AVK",
+    "Materialelager": "PKA",
+    "Parkering": "PKH",
+    "Nybyggeri": "BYO"
+  };
+  return typeLookUp[string];
 }

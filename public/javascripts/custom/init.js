@@ -69,7 +69,12 @@ function init(){
   // Get all todos
   $.get('/api/get/' + query.ID, function(data){
     for(var i = 0; i < data.length; i++){
-      addLayer = eventJSON(data[i],
+      // console.log(data[i]);
+      if(data[i].properties.Type){
+        data[i].properties.Type = lookUp(data[i].properties.Type);
+      }
+
+      var addLayer = eventJSON(data[i],
         {color: "#e78a0f"},
         {color: "#ffd088"},
         true
@@ -188,7 +193,7 @@ function init(){
 
         labels.addLayer(marker);
     }
-  });
+    });
 
   add2LayerList("Bygninger", dtuByg);
   add2LayerList("Bygninger - Labels", labels);
