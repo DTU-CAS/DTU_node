@@ -1,72 +1,110 @@
-/*
- * Makes a geojson show a table of attributes on click
- * Author: NIRAS - Casper Fibæk
- */
+function editPanel(feature){
+  var fields = [
+    [
+      "Byggeplads hegn",
+      "Aflevering",
+      "Anlæg",
+      "Byggeprojekt",
+      "Bygning under opførelse",
+      "Bygning under ombyg/ renovering",
+      "Bygning under nedrivning",
+      "Drift/ commisioning",
+      "Forberedende arbejde/ drift",
+      "Installationer/ komplettering",
+      "Jordarbejder/ fundering",
+      "Midlertidig bygning",
+      "Ombygning/renovering",
+      "Oplag",
+      "Råhus",
+      "Skurby",
+      "Udførelse",
+      "Udgravning"
+    ],
+    [
+      "Byggeplads"
+    ],
+    [
+      "Tung trafik",
+      "Midlertidig gangsti",
+      "Lukket for gennemkørsel"
+    ],
+    [
+      "Parkering",
+      "Materialelager"
+    ]
+  ];
 
- function editPanel(feature){
-   console.log(feature);
-   $("#interface").prepend("<div class='infoEdit'><table id='infoTable'></table></div>");
+   $("#interface").prepend(
+     "<div class='infoEdit'>" +
+        "<table id='infoTable'></table>" +
+        "<div id='attrSelections'><ul></ul></div>" +
+    "</div>");
 
-// change this to a show/hide function
    var tr = $("<table class='attributes'></table>");
    for (var key in feature.properties) {
      if (feature.properties.hasOwnProperty(key)) {
-       // What should be editable
-       if(key === "Type" ||
-          key === "Status"){
-         $("#infoTable").append("<tr class='editRow hoverPointer'><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='false'>" + String(feature.properties[key] + "</td></tr>"));
-       } else if (
-          key === "Navn"
-       ){
-         $("#infoTable").append("<tr class='editRow'><td type='key' ref='"+ key + "'>" + key + "</td><td type='attribute' contenteditable='true'>" + String(feature.properties[key] + "</td></tr>"));
+       if(key === "Type"){
+         $("#infoTable").append("<tr id='info-Type' class='editRow hoverPointer'><td class='key' ref='"+ key + "'>" + key + "</td><td class='attribute' contenteditable='false'>" + String(feature.properties[key] + "</td></tr>"));
+       } else if (key === "Navn"){
+         $("#infoTable").append("<tr id='info-Navn' class='editRow'><td class='key' ref='"+ key + "'>" + key + "</td><td class='attribute' contenteditable='true'>" + String(feature.properties[key] + "</td></tr>"));
+       } else if (key === "Status"){
+         $("#infoTable").append("<tr id='info-Status' class='editRow hoverPointer'><td class='key' ref='"+ key + "'>" + key + "</td><td class='attribute' contenteditable='false'>" + String(feature.properties[key] + "</td></tr>"));
        }
      }
    }
 
-   $(".editRow").each(function(){
-     var row = $(this).children();
-     for(var i = 0; i < row.length; i++){
-       if($(row[i]).attr("ref") === "Status"){
-         $(row[i]).siblings().click(function(){
-           $("#interface").prepend("<div class='slide-menu'><ul></ul></div>");
+   $("#info-Type").on("click", function(){
+     $("#attrSelections").css("left", ($(".infoEdit").width()+20) + "px");
+     $(".editRow").css("background", "#252830");
+     $(this).css("background", "#3e4149");
+     var _thisType = $("#info-Type > .attribute").text();
+     var typeList = '';
 
-           $(".slide-menu > ul").append(
-             "<li>Igangsat</li>" +
-             "<li>Afsluttet</li>"
-           );
-
-           var toChange = $(this);
-
-           $(".slide-menu > ul > li").click(function(){
-             var text = $(this).text();
-             $(toChange).text(text);
-           });
-
-         });
-       } else if ($(row[i]).attr("ref") === "Type"){
-         $(row[i]).siblings().click(function(){
-           $("#interface").prepend("<div class='slide-menu'><ul></ul></div>");
-
-           $(".slide-menu > ul").append(
-             "<li>Byggeri</li>" +
-             "<li>Parkering</li>" +
-             "<li>Kina</li>" +
-             "<li>Trump</li>"
-           );
-
-           var toChange = $(this);
-
-           $(".slide-menu > ul > li").click(function(){
-             var text = $(this).text();
-             $(toChange).text(text);
-           });
-
-         });
+     for(var i = 0; i < fields.length; i++){
+       for(var j = 0; j < fields[i].length; j++){
+         if(fields[i][j].indexOf(_thisType) !== -1){
+           for (var w = 0; w < fields[i].length; w++){
+             typeList += "<li>" + fields[i][w] + "</li>";
+           }
+         }
        }
      }
-   });
 
- }
+     $("#attrSelections > ul").empty().append(typeList);
+     $("#attrSelections > ul > li").unbind().click(function(){
+       $("#info-Type > .attribute").text($(this).text());
+       $("#attrSelections").css("left", ($(".infoEdit").width()+20) + "px");
+     });
+     $("#attrSelections").animate({
+        width: "160px",
+     }, 150 );
+   });
+   $("#info-Status").on("click", function(){
+     $("#attrSelections").css("left", ($(".infoEdit").width()+20) + "px");
+     $(".editRow").css("background", "#252830");
+     $(this).css("background", "#3e4149");
+     var statusList = '';
+     for(var i = 0; i < getFields("status").length; i++){
+       statusList += "<li>" + getFields("status")[i] + "</li>";
+     }
+     $("#attrSelections > ul").empty().append(statusList);
+     $("#attrSelections > ul > li").unbind().click(function(){
+       $("#info-Status > .attribute").text($(this).text());
+       $("#attrSelections").css("left", ($(".infoEdit").width()+20) + "px");
+     });
+     $("#attrSelections").animate({
+        width: "160px",
+     }, 150 );
+   });
+   $("#info-Navn").on("click", function(){
+     $(".editRow").css("background", "#252830");
+     $(this).css("background", "#3e4149");
+     $("#attrSelections > ul").empty();
+     $("#attrSelections").animate({
+        width: "0",
+     }, 100 );
+   });
+}
 
  function addRow(key, attribute){
    return "<tr class='table-row'>" +
@@ -82,11 +120,15 @@ function infoPanel(obj, edit){
       if(key !== "CG_ID" &&
          key !== "ProjektID" &&
          key.indexOf("label") === -1 &&
-         key.indexOf("Label") === -1){
+         key.indexOf("Label") === -1 &&
+         obj[key] !== "null" &&
+         obj[key] !== null){
 
-          // if(key !== "P_pladser" && (obj[key] === null || obj[key] === 'null')){
+         if(key === "P_pladser" && (obj[key] === null || obj[key] === 'null')){
+            // how do I reverse this?
+         } else {
             table += addRow(key, obj[key]);
-          // }
+         }
       }
     }
   }

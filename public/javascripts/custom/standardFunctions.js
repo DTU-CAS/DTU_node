@@ -53,24 +53,27 @@ function arr2bounds(arr, reverse){
 function addJSON(json, editable){
   if(editable !== true){
     var projektType = $(".lastSelected").attr("ref");
-    var projektFelter = getFields(projektType);
 
     json.properties = {
       "ProjektID": QueryString().ID,
-      "Type": projektType
+      "Type": getFields(projektType)[0],
+      "Navn": QueryString().NAME,
+      "Status": getFields("status")[0]
     };
 
-    for (var key1 in projektFelter) {
-      if (projektFelter.hasOwnProperty(key1)) {
-        json.properties[key1] = projektFelter[key1];
-      }
-    }
+    // for (var key1 in projektFelter) {
+    //   if (projektFelter.hasOwnProperty(key1)) {
+    //     json.properties[key1] = projektFelter[key1];
+    //   }
+    // }
   }
 
   var preObject = {
     CG_GEOMETRY: json.geometry,
     ProjektID: json.properties.ProjektID,
-    Type: json.properties.Type
+    Type: json.properties.Type,
+    Navn: json.properties.Navn,
+    Status: json.properties.Status
   };
 
   if(json.properties.Navn && json.properties.Navn !== null){
@@ -98,6 +101,8 @@ function addJSON(json, editable){
     "values": values,
     "geometry": JSON.stringify(preObject.CG_GEOMETRY)
   };
+
+  console.log("postObj: ", postObj);
 
   $.ajax({
     type: "POST",
@@ -141,6 +146,52 @@ function addJSON(json, editable){
     });
 }
 
+function enableEdits(){
+  edd = 1;
+  map.eachLayer(function(layer){
+    // console.log(layer);
+    if (layer instanceof L.Path){
+      if (typeof layer.editor == 'undefined'){
+        if(layer.options.editable !== false){
+          layer.enableEdit();
+        }
+    }}
+  });
+}
+
+function disableEdits(){
+  edd = 0;
+  map.editTools.stopDrawing();
+  map.eachLayer(function(layer){
+    if(layer.editor){
+      if(layer.editor._enabled === true){
+        layer.toggleEdit();
+
+        $("#infoTable > tr > .key").each(function() {
+         if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
+           layer.feature.properties[$(this).attr("ref")] = null;
+         } else {
+           layer.feature.properties[$(this).attr("ref")] = $(this).siblings().text();
+         }
+        });
+
+        if(layer.feature){
+          var updateObj = {};
+          for(var key in layer.feature.properties){
+           if (layer.feature.properties.hasOwnProperty(key)) {
+             if(layer.feature.properties[key] !== null){
+               updateObj[key] = layer.feature.properties[key];
+             }
+           }
+          }
+          updateObj.CG_GEOMETRY = layer.toGeoJSON().geometry;
+          snap.addGuideLayer(layer);
+          db.update(updateObj);
+        }
+     }}
+  });
+  $(".infoEdit, .slide-menu").remove();
+}
 
 function eventJSON(geoJSON, style, highlight, editable){
   var eventLayer = L.geoJSON(geoJSON, {"style": style})
@@ -155,7 +206,7 @@ function eventJSON(geoJSON, style, highlight, editable){
       map.panTo(latLng);
 
       if($(".infoEdit").length > 0){
-        $("#infoTable > tr > td[type='key']").each(function() {
+        $("#infoTable > tr > .key").each(function() {
          if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
            layer.feature.properties[$(this).attr("ref")] = null;
          } else {
@@ -179,6 +230,7 @@ function eventJSON(geoJSON, style, highlight, editable){
 
       $("#editGeom").click(function(){
         if($(this).hasClass("disabled-edit")){
+          disableEdits();
           edd = 1;
 
           for (var i = snap._guides.length - 1; i >= 0; i--) {
@@ -198,7 +250,7 @@ function eventJSON(geoJSON, style, highlight, editable){
           $(this).removeClass("enabled-edit").addClass("disabled-edit");
           $(this).first().text("Rediger");
 
-          $("#infoTable > tr > td[type='key']").each(function() {
+          $("#infoTable > tr > .key").each(function() {
            if($(this).siblings().text() === "null" || $(this).siblings().text().length === 0){
              layer.feature.properties[$(this).attr("ref")] = null;
            } else {
@@ -405,15 +457,13 @@ function addGFI(e){
     });
 })();
 
-function getFields(string, type){
-
+function getFields(string){
   if(string === "byggeri"){
-    if(type === "type"){
       return [
+        "Byggeplads hegn",
         "Aflevering",
         "Anlæg",
         "Byggeprojekt",
-        "Byggeplads hegn",
         "Bygning under opførelse",
         "Bygning under ombyg/ renovering",
         "Bygning under nedrivning",
@@ -429,55 +479,27 @@ function getFields(string, type){
         "Udførelse",
         "Udgravning"
       ];
-    } else {
-      return {
-        "Navn": null,
-        "Type": null,
-        "Startdato": null,
-        "Slutdato": null,
-        "Projektleder": null,
-        "Status": null
-      };
-    }
   } else if (string === "byggeplads"){
-    return {
-      "Navn": null,
-      "Type": "Byggeplads",
-      "Startdato": null,
-      "Slutdato": null,
-      "Projektleder": null,
-      "Status": null
-    };
+      return [
+        "Byggeplads"
+        ];
   } else if (string === "adgangsvej"){
-    if(type === "type"){
       return [
         "Tung trafik",
         "Midlertidig gangsti",
         "Lukket for gennemkørsel"
       ];
-    }
-    return {
-      "Navn": null,
-      "Type": null,
-      "Startdato": null,
-      "Slutdato": null,
-      "Status": null
-    };
   } else if (string === "parkering"){
-    if(type === "type"){
       return [
         "Parkering",
         "Materialelager"
       ];
-    }
-      return {
-        "Navn": null,
-        "Type": null,
-        "Startdato": null,
-        "Slutdato": null,
-        "Projektleder": null,
-        "P_pladser": null,
-        "Status": null
-      };
+  } else if (string === "status"){
+      return [
+        "Aktivt",
+        "Afsluttet",
+        "Garanti",
+        "Ongoing"
+      ];
     }
 }
