@@ -1,36 +1,8 @@
 function interface() {
 
-  $( ".addGeometry" )
-    .click( function () {
-      if ( $( this )
-        .hasClass( "selected" ) ) {
-        $( ".selected" )
-          .removeClass( "selected" );
-        $( ".lastSelected" )
-          .removeClass( "lastSelected" );
-        $( this )
-          .addClass( "lastSelected" );
-        disableEdits();
-        edd = 0;
-      } else {
-        disableEdits();
-        $( ".selected" )
-          .removeClass( "selected" );
-        $( ".lastSelected" )
-          .removeClass( "lastSelected" );
-        $( this )
-          .addClass( "selected" )
-          .addClass( "lastSelected" );
-        if ( $( this )
-          .attr( "ref" ) === "adgangsvej" ) {
-          map.editTools.startPolyline();
-        } else {
-          map.editTools.startPolygon();
-        }
-        edd = 1;
-      }
-    } );
-
+  /*******************************************************************************
+    Functionality of open and hide button left of interface.
+  *******************************************************************************/
   $( "#openHide" )
     .click( function () {
       if ( $( this )
@@ -38,37 +10,77 @@ function interface() {
         $( this )
           .removeClass( "open" )
           .addClass( "closed" )
-          .empty()
-          .append( "<i class='fa fa-angle-double-left' aria-hidden='true'></i>" )
-          .css( "background", "#252830;" )
           .animate( {
-            right: "0"
-          }, 'fast' );
+            right: 0
+          }, 'fast' )
+          .children()
+          .removeClass( "fa-angle-double-right" )
+          .addClass( "fa-angle-double-left" );
 
         $( "#input" )
           .animate( {
-            width: "0",
+            width: 0,
             opacity: 0
           }, 'fast' );
+
       } else {
         $( this )
           .removeClass( "closed" )
           .addClass( "open" )
-          .empty()
-          .append( "<i class='fa fa-angle-double-right' aria-hidden='true'></i>" )
           .animate( {
-            right: "250px"
-          }, 'fast' );
+            right: 250
+          }, 'fast' )
+          .children()
+          .removeClass( "fa-angle-double-left" )
+          .addClass( "fa-angle-double-right" );
 
         $( "#input" )
           .animate( {
-            width: "250",
+            width: 250,
             opacity: 1
           }, 'fast' );
+
       }
     } );
 
+  /*******************************************************************************
+    Functionality of the "opret" buttons
+  *******************************************************************************/
+  $( ".addGeometry" )
+    .click( function () {
+      disableEdits();
+      if ( $( this )
+        .hasClass( "selected" ) ) {
+        $( "#editButtons > .selected" )
+          .removeClass( "selected" );
+        $( "#editButtons > .lastSelected" )
+          .removeClass( "lastSelected" );
+        $( this )
+          .addClass( "lastSelected" );
 
+      } else {
+        disableEdits();
+        $( "#editButtons > .selected" )
+          .removeClass( "selected" );
+        $( "#editButtons > .lastSelected" )
+          .removeClass( "lastSelected" );
+        $( this )
+          .addClass( "selected" )
+          .addClass( "lastSelected" );
+        if ( $( this )
+          .attr( "ref" ) === "adgangsvej" ) {
+          // create a polyline if it is a road -
+          map.editTools.startPolyline();
+        } else {
+          // otherwise create a polygon.
+          map.editTools.startPolygon();
+        }
+      }
+    } );
+
+  /*******************************************************************************
+    Hide or display the main menu items "Rediger & DTU lag"
+  *******************************************************************************/
   $( ".menu-item" )
     .click( function () {
       if ( !$( this )
@@ -88,14 +100,13 @@ function interface() {
           .is( "#menu-edit-top" ) ) {
           $( "#menu-edit-main" )
             .addClass( "main" );
-        } else if ( $( this )
-          .is( "#menu-tools-top" ) ) {
-          $( "#menu-tools-main" )
-            .addClass( "main" );
         }
       }
     } );
 
+  /*******************************************************************************
+    Disable and commit edits on "esc"-press and double click.
+  *******************************************************************************/
   $( "#map" )
     .keyup( function ( e ) {
       if ( e.keyCode === 27 ) { // esc
@@ -103,26 +114,10 @@ function interface() {
         $( ".selected" )
           .removeClass( "selected" );
       }
-    } );
-
-  $( document )
+    } )
     .dblclick( function () {
       disableEdits();
       $( ".selected" )
         .removeClass( "selected" );
     } );
-
-  map.on( 'editable:drawing:end', function ( e ) {
-    if ( e.layer._parts ) {
-      if ( e.layer._parts.length > 0 ) {
-        addJSON( e.layer.toGeoJSON() );
-        map.removeLayer( e.layer );
-        $( ".selected" )
-          .removeClass( "selected" );
-      }
-    }
-    edd = 0;
-  } );
-
-  snapping();
 }

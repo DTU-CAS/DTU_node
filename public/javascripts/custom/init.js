@@ -10,10 +10,9 @@ function init() {
     jQuery( "#bygID > p" )
       .text( query.NAME );
 
-/*******************************************************************************
-    BASIC LEAFLET OPTIONS
-*******************************************************************************/
-
+    /*******************************************************************************
+      BASIC LEAFLET OPTIONS
+    *******************************************************************************/
     // create the map
     map = L.map( 'map', {
       center: [ 55.787016, 12.522536 ],
@@ -76,10 +75,106 @@ function init() {
       } )
       .addTo( map );
 
-/*******************************************************************************
-    Get KortInfo layers and add WFS
-*******************************************************************************/
+    /*******************************************************************************
+        Snapping functionality
+    *******************************************************************************/
+    snap = new L.Handler.MarkerSnap( map );
 
+    var snapMarker = L.marker( map.getCenter(), {
+      icon: map.editTools.createVertexIcon( {
+        className: 'leaflet-div-icon leaflet-drawing-icon'
+      } ),
+      opacity: 1,
+      zIndexOffset: 1000
+    } );
+
+    snapMarker
+      .on( 'snap', function ( e ) {
+        snapMarker.addTo( map );
+      } )
+      .on( 'unsnap', function ( e ) {
+        snapMarker.remove();
+      } );
+
+    snap.removeGuide = function ( layer ) {
+      for ( var i = snap._guides.length - 1; i >= 0; i-- ) {
+        if ( snap._guides[ i ]._leaflet_id === layer._leaflet_id ) {
+          snap._guides.splice( i, 1 );
+        }
+      }
+    };
+
+    var followMouse = function ( e ) {
+      snapMarker.setLatLng( e.latlng );
+    };
+
+    snap.watchMarker( snapMarker );
+
+    map
+      .on( "editable:enable", function ( e ) {
+        map._editing = e.layer._leaflet_id;
+      } )
+      .on( "editable:disable", function ( e ) {
+        map._editing = null;
+      } )
+      .on( 'editable:vertex:dragstart', function ( e ) {
+        snap.watchMarker( e.vertex );
+      } )
+      .on( 'editable:vertex:dragend', function ( e ) {
+        snap.unwatchMarker( e.vertex );
+      } )
+      .on( 'editable:drawing:start', function () {
+        this.on( 'mousemove', followMouse );
+      } )
+      .on( 'editable:drawing:click', function ( e ) {
+        var latlng = snapMarker.getLatLng();
+        e.latlng.lat = latlng.lat;
+        e.latlng.lng = latlng.lng;
+      } )
+      .on( 'editable:drawing:end', function ( e ) {
+        this.off( 'mousemove', followMouse );
+        snapMarker.remove();
+        if ( e.layer._parts ) {
+          if ( e.layer._parts.length > 0 ) {
+            addJSON( e.layer.toGeoJSON() );
+            map.removeLayer( e.layer );
+            $( ".selected" )
+              .removeClass( "selected" );
+          }
+        }
+      } );
+
+    map.on( 'layeradd', function ( e ) {
+      if ( e.layer instanceof L.Path ) {
+        if ( map._editing !== e.layer._leaflet_id ) {
+          snap.addGuideLayer( e.layer );
+        }
+      }
+    } );
+
+    map.on( 'layerremove', function ( e ) {
+      snap.removeGuide( e.layer );
+    } );
+
+    $( "#snapping" )
+      .click( function () {
+        if ( $( this )
+          .hasClass( "off" ) ) {
+          snap.enable();
+          $( this )
+            .removeClass( "off" )
+            .addClass( "on" );
+        } else {
+          snap.disable();
+          $( this )
+            .removeClass( "on" )
+            .addClass( "off" );
+        }
+      } );
+
+    /*******************************************************************************
+        Get KortInfo layers and add WFS
+    *******************************************************************************/
     $.get( '/api/get/' + query.ID, function ( data ) {
       for ( var i = 0; i < data.length; i++ ) {
         // console.log(data[i]);
@@ -92,33 +187,39 @@ function init() {
       }
     } );
 
-    addWfsLayer( "ugis:T6832", "Byggepladser", style.Byggepladser, false);
+    // WFS layers: layername, displayname, style, editable
+    addWfsLayer( "ugis:T6832", "Byggepladser", style.Byggepladser, false );
     addWfsLayer( "ugis:T6834", "Parkering", style.Parkering, false );
     addWfsLayer( "ugis:T6831", "Adgangsveje", style.Adgangsveje, false );
-    addWfsLayer( "ugis:T6833", "Ombyg og Renovering", style["Ombyg og Renovering"], false );
+    addWfsLayer( "ugis:T6833", "Ombyg og Renovering", style[ "Ombyg og Renovering" ], false );
     addWfsLayer( "ugis:T7418", "Nybyggeri", style.Nybyggeri, false );
+    addWMSlayer( "18454", "Streetfood" );
 
-/*******************************************************************************
-    Add Buildings and lables (local file) TODO: get buildings from WFS
-*******************************************************************************/
-
-    var dtuByg = eventJSON( dtu_bygninger, style.Bygninger, false );
+    /*******************************************************************************
+        Add Buildings and lables (local file) TODO: get buildings from WFS
+    *******************************************************************************/
+    // Adds local dtu buildings layer
     var labels = L.layerGroup();
 
+    var dtuByg = eventJSON( dtu_bygninger, style.Bygninger, false );
+    // Loop through buildings and create labels
     dtuByg.eachLayer( function ( layer ) {
 
       var properties = layer.feature.properties;
       var bygnr = properties.DTUbygnnr;
       var afsnit = properties.Afsnit;
 
+      // Create string if building if afsnit is not empty
       var postStr = "Bygning " + bygnr;
       if ( afsnit !== null && afsnit !== 0 ) {
         postStr += ", " + afsnit;
       }
 
+      // Create markers at the centroid of the building and attach toolTip
       if ( bygnr !== null ) {
         var marker = L.marker(
-            layer.getBounds()
+            layer
+            .getBounds()
             .getCenter(), {
               opacity: 0
             }
@@ -135,13 +236,16 @@ function init() {
 
     add2LayerList( "Bygninger", dtuByg );
     add2LayerList( "Bygninger - Labels", labels );
-    addWMSlayer( "18454", "Streetfood" );
 
+    // Start loading the interface
     interface();
 
-    } else {
-      jQuery( "body" )
-        .empty()
-        .html("<p> Wrong URL parameters </p>");
-    }
+    /*******************************************************************************
+      IF not valid ID is shown, don't load interface and display error message.
+    *******************************************************************************/
+  } else {
+    jQuery( "body" )
+      .empty()
+      .html( "<p> Wrong URL parameters </p>" );
+  }
 }

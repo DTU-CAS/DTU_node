@@ -63,6 +63,14 @@
   display: none;
 }
 
+.leaflet-drawing-icon{
+  border-radius: 50%;
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+}
+
 .leaflet-editing-icon, .leaflet-vertex-icon{
   border-radius: 50%;
   width: 12px !important;
