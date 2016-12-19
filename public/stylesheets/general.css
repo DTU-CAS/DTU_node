@@ -7,6 +7,13 @@ html, body {
   width: 100%;
   overflow: hidden;
   margin: 0;
+  background: #252830;
+}
+
+body > p{
+  text-align: center;
+  font-family: 'Open Sans', arial, sans-serif;
+  color: #fff;
 }
 
 #interface {
@@ -424,6 +431,10 @@ html, body {
 
 .editRow > .attribute:hover{
   background: #1ca8dd;
+}
+
+.editRow > .key{
+  cursor: pointer;
 }
 
 .table-row{

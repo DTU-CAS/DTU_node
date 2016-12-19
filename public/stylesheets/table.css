@@ -11,57 +11,8 @@ td{
   max-width: 200px !important;
 }
 
-#attr{
-  position: absolute;
-  color: white;
-  height: 100px;
-  width: 300px;
-  padding: 10px;
-  left: 100px;
-  bottom: 300px;
-  padding-left: 50px;
-  z-index: 1010;
-  background: #333;
-  border-top: 1px solid black;
-}
-
 .table-add, .table-delete, .table-edit{
   margin-left: 6px;
   color: #fff;
   text-align: center;
-}
-
-.table-remove{
-  min-width: 0 !important;
-  width: 30px;
-}
-
-.table-remove > i:hover{
-  font-size: larger;
-  color: #e64759;
-  cursor: pointer;
-  margin-left: -1px;
-}
-
-.boolean, .number, .string{
-  min-width: 100px;
-}
-
-.boolean{
-  color: #1bc98e;
-}
-
-.number{
-  color: #1ca8dd;
-}
-
-.string{
-  color: #f1dee0;
-}
-
-.rowName{
-  color: #999;
-  font-weight: bold;
-  padding-left: 6px;
-  padding-right: 6px;
 }

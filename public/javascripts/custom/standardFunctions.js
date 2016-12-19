@@ -63,12 +63,6 @@ function addJSON( json, editable ) {
         .NAME,
       "Status": getFields( "status" )[ 0 ]
     };
-
-    // for (var key1 in projektFelter) {
-    //   if (projektFelter.hasOwnProperty(key1)) {
-    //     json.properties[key1] = projektFelter[key1];
-    //   }
-    // }
   }
 
   var preObject = {
@@ -127,11 +121,7 @@ function addJSON( json, editable ) {
             .write();
           json.properties.CG_ID = res;
 
-          var addLayer = eventJSON( json, {
-                color: "#1ca8dd"
-              }, {
-                color: "#28edca"
-              },
+          var addLayer = eventJSON( json, style.Standard,
               true
             )
             .addTo( map );
@@ -223,7 +213,7 @@ function disableEdits() {
     .remove();
 }
 
-function eventJSON( geoJSON, style, highlight, editable ) {
+function eventJSON( geoJSON, style, editable ) {
   var eventLayer = L.geoJSON( geoJSON, {
       "style": style
     } )
@@ -232,8 +222,7 @@ function eventJSON( geoJSON, style, highlight, editable ) {
       var layer = this.getLayer( e.layer._leaflet_id ),
         feature = layer.feature,
         latLng = e.latlng;
-      edit = editable;
-      leafletID = e.layer._leaflet_id;
+        leafletID = e.layer._leaflet_id;
 
       map.panTo( latLng );
 
@@ -262,13 +251,13 @@ function eventJSON( geoJSON, style, highlight, editable ) {
           closeButton: false
         } )
         .setLatLng( latLng )
-        .setContent( infoPanel( feature.properties, edit ) )
+        .setContent( infoPanel( feature.properties, editable ) )
         .openOn( map );
 
       $( ".leaflet-popup" )
         .css( "width", "284px" );
 
-      if ( edit === true ) {
+      if ( editable === true ) {
         if ( layer.editEnabled() === true ) {
           $( "#editGeom" )
             .removeClass( "disabled-edit" )
@@ -400,7 +389,14 @@ function eventJSON( geoJSON, style, highlight, editable ) {
     } )
     .on( 'mouseover', function ( e ) {
       var feature = this.getLayer( e.layer._leaflet_id );
-      feature.setStyle( highlight );
+
+      feature.setStyle({
+        color: chroma(feature.options.color).brighten().saturate(),
+        fillColor: chroma(feature.options.fillColor).brighten().saturate(),
+        opacity: feature.options.opacity * 1.2,
+        fillOpacity: feature.options.fillOpacity * 1.2,
+        weight: feature.options.weight * 1.15
+      });
     } )
     .on( 'mouseout', function ( e ) {
       var feature = this.getLayer( e.layer._leaflet_id );
@@ -430,7 +426,7 @@ function addWMSlayer( string, name ) {
   add2LayerList( name, layer );
 }
 
-function addWfsLayer( string, name, style, highlight, editable ) {
+function addWfsLayer( string, name, style, editable ) {
   var wfsBase = "http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?";
   var wfsParams = {
     Site: 'Provider',
@@ -448,7 +444,7 @@ function addWfsLayer( string, name, style, highlight, editable ) {
     url: wfsRequest,
     success: function ( result ) {
       var geom = GML2GeoJSON( result, true );
-      var layer = eventJSON( geom, style, highlight, editable );
+      var layer = eventJSON( geom, style, editable );
       layer.eachLayer( function ( layer ) {
         layer.options.editable = false;
         // console.log(layer);

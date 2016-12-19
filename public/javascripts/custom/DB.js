@@ -1,7 +1,7 @@
   // Connecting and interactiving with the database
   // Author: Casper Fibaek - NIRAS
 
-  db = ( {
+  var db = ( {
     // Test if the database is connected
     // e.g.: db.test()
     test: function () {
@@ -49,7 +49,6 @@
 
               L.geoJSON( res[ i ] )
                 .addTo( map );
-
 
             }
           }
