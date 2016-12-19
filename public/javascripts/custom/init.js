@@ -78,7 +78,10 @@ function init() {
     /*******************************************************************************
         Snapping functionality
     *******************************************************************************/
+    // initialize the snapHandler as a global
     snap = new L.Handler.MarkerSnap( map );
+    // map global that specifies what layer is currently being edited
+    map._editing = null;
 
     var snapMarker = L.marker( map.getCenter(), {
       icon: map.editTools.createVertexIcon( {
@@ -96,6 +99,14 @@ function init() {
         snapMarker.remove();
       } );
 
+    var followMouse = function ( e ) {
+      snapMarker.setLatLng( e.latlng );
+    };
+
+    snap.watchMarker( snapMarker );
+
+    // custom functions to easier add remove guide layers
+    // loop backwards through guide array and remove layers matching ID
     snap.removeGuide = function ( layer ) {
       for ( var i = snap._guides.length - 1; i >= 0; i-- ) {
         if ( snap._guides[ i ]._leaflet_id === layer._leaflet_id ) {
@@ -103,19 +114,32 @@ function init() {
         }
       }
     };
-
-    var followMouse = function ( e ) {
-      snapMarker.setLatLng( e.latlng );
+    // Add a guide that is a polygon and is not the one that is being edited
+    snap.addGuide = function ( layer ) {
+      if ( layer instanceof L.Path ) {
+        if ( map._editing !== layer._leaflet_id ) {
+          snap.addGuideLayer( layer );
+        }
+      }
     };
 
-    snap.watchMarker( snapMarker );
-
+    // event listeners to add or stop snapping depending on visible layers.
     map
+      .on( 'layeradd', function ( e ) {
+        snap.addGuide(e.layer);
+      } )
+      .on( 'layerremove', function ( e ) {
+        snap.removeGuide( e.layer );
+      } )
       .on( "editable:enable", function ( e ) {
         map._editing = e.layer._leaflet_id;
+        map.off( 'layeradd' );
       } )
       .on( "editable:disable", function ( e ) {
         map._editing = null;
+        map.on( 'layeradd', function ( e ) {
+          snap.addGuide(e.layer);
+        } );
       } )
       .on( 'editable:vertex:dragstart', function ( e ) {
         snap.watchMarker( e.vertex );
@@ -136,7 +160,8 @@ function init() {
         snapMarker.remove();
         if ( e.layer._parts ) {
           if ( e.layer._parts.length > 0 ) {
-            addJSON( e.layer.toGeoJSON() );
+            // function is from eventLayers.js
+            dbJSON( e.layer.toGeoJSON() );
             map.removeLayer( e.layer );
             $( ".selected" )
               .removeClass( "selected" );
@@ -144,50 +169,27 @@ function init() {
         }
       } );
 
-    map.on( 'layeradd', function ( e ) {
-      if ( e.layer instanceof L.Path ) {
-        if ( map._editing !== e.layer._leaflet_id ) {
-          snap.addGuideLayer( e.layer );
-        }
-      }
-    } );
-
-    map.on( 'layerremove', function ( e ) {
-      snap.removeGuide( e.layer );
-    } );
-
-    $( "#snapping" )
-      .click( function () {
-        if ( $( this )
-          .hasClass( "off" ) ) {
-          snap.enable();
-          $( this )
-            .removeClass( "off" )
-            .addClass( "on" );
-        } else {
-          snap.disable();
-          $( this )
-            .removeClass( "on" )
-            .addClass( "off" );
-        }
-      } );
-
     /*******************************************************************************
-        Get KortInfo layers and add WFS
+        Get KortInfo layers and add WFS TODO: change standard style to match type
     *******************************************************************************/
     $.get( '/api/get/' + query.ID, function ( data ) {
       for ( var i = 0; i < data.length; i++ ) {
-        // console.log(data[i]);
+
+        // change the type to the more readable lookup type
         if ( data[ i ].properties.Type ) {
+          // function is from styles_andlookups.js
           data[ i ].properties.Type = lookUp( data[ i ].properties.Type );
         }
 
+        // add the layer with a standard style
+        // function is from eventLayers.js
         var addLayer = eventJSON( data[ i ], style.Standard, true )
           .addTo( map );
       }
     } );
 
     // WFS layers: layername, displayname, style, editable
+    // functions are from layerFunctions.js
     addWfsLayer( "ugis:T6832", "Byggepladser", style.Byggepladser, false );
     addWfsLayer( "ugis:T6834", "Parkering", style.Parkering, false );
     addWfsLayer( "ugis:T6831", "Adgangsveje", style.Adgangsveje, false );
@@ -201,6 +203,7 @@ function init() {
     // Adds local dtu buildings layer
     var labels = L.layerGroup();
 
+    // function is from eventLayers.js
     var dtuByg = eventJSON( dtu_bygninger, style.Bygninger, false );
     // Loop through buildings and create labels
     dtuByg.eachLayer( function ( layer ) {
@@ -234,6 +237,8 @@ function init() {
       }
     } );
 
+    // add the layers to the custom layer list.
+    // function is from layerFunctions.js
     add2LayerList( "Bygninger", dtuByg );
     add2LayerList( "Bygninger - Labels", labels );
 

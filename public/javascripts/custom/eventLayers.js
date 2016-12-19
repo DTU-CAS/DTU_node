@@ -1,10 +1,14 @@
+/*
+  loop through layers and find the ones that are being edited.
+  if a layer is being edited, stop editing and update the database
+*/
 function disableEdits() {
-  map.editTools.stopDrawing();
   map.eachLayer( function ( layer ) {
     if ( layer.editor ) {
       if ( layer.editor._enabled === true ) {
         layer.toggleEdit();
 
+        // update the layer attributes to correspond with the "rediger attributer table"
         $( "#infoTable > tr > .key" )
           .each( function () {
             if ( $( this )
@@ -23,6 +27,8 @@ function disableEdits() {
             }
           } );
 
+        // create the object to send to the database
+        // use the lookup table to convert back to acronym form.
         if ( layer.feature ) {
           var updateObj = {};
           for ( var key in layer.feature.properties ) {
@@ -38,46 +44,48 @@ function disableEdits() {
           }
           updateObj.CG_GEOMETRY = layer.toGeoJSON()
             .geometry;
+
+          // add to snap layer and update database
           snap.addGuideLayer( layer );
           db.update( updateObj );
         }
       }
     }
   } );
+
+  // remove popup menues
   $( ".infoEdit, .slide-menu" )
     .remove();
 }
 
-function addJSON( json, editable ) {
-  if ( editable !== true ) {
-    var projektType = $( ".lastSelected" )
-      .attr( "ref" );
+/*
+  Adds new layers to the map as well as the database
+*/
+function dbJSON( json, editable ) {
+  var projektType = $( ".lastSelected" )
+    .attr( "ref" );
 
-    json.properties = {
-      "ProjektID": QueryString()
-        .ID,
-      "Type": getFields( projektType )[ 0 ],
-      "Navn": QueryString()
-        .NAME,
-      "Status": getFields( "status" )[ 0 ]
-    };
-  }
+  // takes the URL parameters and add to the newly created layer
+  json.properties = {
+    "ProjektID": QueryString()
+      .ID,
+    "Type": getFields( projektType )[ 0 ],
+    "Navn": QueryString()
+      .NAME,
+    "Status": getFields( "status" )[ 0 ]
+  };
 
+  // prepares the layer for upload to the database.
   var preObject = {
     CG_GEOMETRY: json.geometry,
     ProjektID: json.properties.ProjektID,
-    Type: lookUp( json.properties.Type ),
+    Type: lookUp( json.properties.Type ), // changes the type back to abbreviative
     Navn: json.properties.Navn,
     Status: json.properties.Status
   };
 
-  if ( json.properties.Navn && json.properties.Navn !== null ) {
-    preObject.Navn = json.properties.Navn;
-  }
-  if ( json.properties.Status && json.properties.Status !== null ) {
-    preObject.Status = json.properties.Status;
-  }
-
+  // readies the keys and attrbute for db post
+  // TODO: this should be in the DB.js script
   var keys = '';
   var values = '';
   for ( var key in preObject ) {
@@ -99,6 +107,8 @@ function addJSON( json, editable ) {
 
   console.log( "postObj: ", postObj );
 
+  // post the layer to the database
+  // gets the latest ID before posting it.
   $.ajax( {
       type: "POST",
       url: '/api/post/',
@@ -107,6 +117,7 @@ function addJSON( json, editable ) {
     } )
     .done( function () {
 
+      // get latest ID
       $.ajax( {
           type: "GET",
           url: '/api/latest/',
@@ -114,22 +125,32 @@ function addJSON( json, editable ) {
         } )
         .done( function ( res ) {
           console.log( res );
+          // translate the wellknown text to JSON
           var wkt = new Wkt.Wkt();
           wkt.read( JSON.stringify( json ) )
             .write();
+          // set the ID equal to the latests
           json.properties.CG_ID = res;
 
+          // add the layer to the map
+          // TODO: change style to match type
           var addLayer = eventJSON( json, style.Standard,
               true
             )
             .addTo( map );
 
+          if(editable === true){
+            editPanel(json);
+          }
+
+          // if the layer is suppose to be editable, remove it from guidelayers
+          // and enable edits.
           if ( editable === true ) {
-            // addLayer.options.editable = true;
             addLayer.eachLayer( function ( layer ) {
               if ( layer instanceof L.Path ) {
                 if ( typeof layer.editor == 'undefined' ) {
                   if ( layer.options.editable !== false ) {
+                    snap.removeGuide( layer );
                     layer.enableEdit();
                   }
                 }
@@ -146,50 +167,43 @@ function addJSON( json, editable ) {
     } );
 }
 
+/*
+  Takes a normal geoJSON and adds custom events
+*/
 function eventJSON( geoJSON, style, editable ) {
+  // if a popup is already open, close it.
+  map.closePopup();
+  // creates the layer and add style
   var eventLayer = L.geoJSON( geoJSON, {
       "style": style
     } )
+
+    /*******************************************************************************
+        CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK
+    *******************************************************************************/
     .on( 'click', function ( e ) {
 
-      var layer = this.getLayer( e.layer._leaflet_id ),
-        feature = layer.feature,
-        latLng = e.latlng;
-      leafletID = e.layer._leaflet_id;
+      // set up variables
+      var layer = e.layer,
+          feature = layer.feature;
 
-      map.panTo( latLng );
+      // pan to layer
+      map.panTo( layer.getCenter() );
 
-      if ( $( ".infoEdit" )
-        .length > 0 ) {
-        $( "#infoTable > tr > .key" )
-          .each( function () {
-            if ( $( this )
-              .siblings()
-              .text() === "null" || $( this )
-              .siblings()
-              .text()
-              .length === 0 ) {
-              layer.feature.properties[ $( this )
-                .attr( "ref" ) ] = null;
-            } else {
-              layer.feature.properties[ $( this )
-                  .attr( "ref" ) ] = $( this )
-                .siblings()
-                .text();
-            }
-          } );
-      }
-
+      // create a poput and set information equal to properties.
       L.popup( {
           closeButton: false
         } )
-        .setLatLng( latLng )
+        .setLatLng( layer.getCenter() )
+        // function is from infoPanel.js
         .setContent( infoPanel( feature.properties, editable ) )
         .openOn( map );
 
-      $( ".leaflet-popup" )
-        .css( "width", "284px" );
-
+      /*******************************************************************************
+          If it is suppose to be editable (rediger and delete buttons)
+      *******************************************************************************/
+      // If the layer is clicked and editing is already enabled,
+      // show "Gem geometri instead of 'rediger'"
       if ( editable === true ) {
         if ( layer.editEnabled() === true ) {
           $( "#editGeom" )
@@ -200,29 +214,40 @@ function eventJSON( geoJSON, style, editable ) {
             .text( "Gem geometri" );
         }
 
+        // EDIT GEOMETRY
         $( "#editGeom" )
           .click( function () {
-            if ( $( this )
-              .hasClass( "disabled-edit" ) ) {
-              disableEdits();
-              $( ".infoEdit, .slide-menu" )
-                .remove();
-
-              snap.removeGuide( e.layer );
-
-              layer.enableEdit();
-
+            // If we are starting an editing session
+            if ( $( this ).hasClass( "disabled-edit" ) ) {
               $( this )
                 .removeClass( "disabled-edit" )
                 .addClass( "enabled-edit" );
               $( this )
                 .first()
                 .text( "Gem geometri" );
-              map.closePopup();
-              editPanel( feature );
-            } else {
+              $( ".infoEdit, .slide-menu" )
+                .remove();
 
+              // stop any previous editing
+              disableEdits();
+
+              // remove itself from the guide array
+              snap.removeGuide( layer );
+
+              // enable editing
+              layer.enableEdit();
+
+              // close the popup so it doesn't obscure the geometry
+              map.closePopup();
+
+              // open the editPanel (Edit attributes)
+              editPanel( feature );
+
+            // if we are ending the editing session
+            } else {
+              // disable editing
               layer.toggleEdit();
+
               $( this )
                 .removeClass( "enabled-edit" )
                 .addClass( "disabled-edit" );
@@ -230,6 +255,7 @@ function eventJSON( geoJSON, style, editable ) {
                 .first()
                 .text( "Rediger" );
 
+              // update the layer.properties to match the editPanel
               $( "#infoTable > tr > .key" )
                 .each( function () {
                   if ( $( this )
@@ -248,11 +274,16 @@ function eventJSON( geoJSON, style, editable ) {
                   }
                 } );
 
+              $( ".infoEdit" )
+                .remove();
+
+              // prepare the object for the database
               var updateObj = {};
               for ( var key in layer.feature.properties ) {
                 if ( layer.feature.properties.hasOwnProperty( key ) ) {
                   if ( layer.feature.properties[ key ] !== null ) {
                     if ( key === "Type" ) {
+                      // loopUp is from styles_andlookups.js
                       updateObj[ key ] = lookUp( layer.feature.properties[ key ] );
                     } else {
                       updateObj[ key ] = layer.feature.properties[ key ];
@@ -261,31 +292,43 @@ function eventJSON( geoJSON, style, editable ) {
                 }
               }
 
+              // Update the database
               updateObj.CG_GEOMETRY = layer.toGeoJSON()
                 .geometry;
-
               db.update( updateObj );
-              $( ".infoEdit" )
-                .remove();
+
+              // add the edited layer to the guide arrays
               snap.addGuideLayer( layer );
             }
           } );
 
+        // REMOVE GEOMETRY
         $( "#deleteGeom" )
           .click( function () {
+            // remove the layer from the map
             map.removeLayer( layer );
+            // close popups
             map.closePopup();
+            // delete the ID from the database
             db.delete( "ALL", layer.feature.properties.CG_ID );
+            // stop any editing
             disableEdits();
           } );
+
+      // If it is not suppose to be editable:
       } else {
+
+        // COPY GEOMETRY
         $( "#copyGeom" )
           .click( function () {
+            // close popups
             map.closePopup();
 
+            // create a geojson copy
             var layerCopy = layer.toGeoJSON();
+            // get all fields from styles_and_lookups.js
             var allFields = getFields( "all" );
-
+            // add properties from URL parameters
             layerCopy.properties = {
               "ProjektID": QueryString()
                 .ID,
@@ -293,12 +336,14 @@ function eventJSON( geoJSON, style, editable ) {
                 .NAME,
             };
 
+            // if the type exists look it up and add it
             if ( allFields.indexOf( layer.feature.properties.Type === -1 ) ) {
               layerCopy.properties.Type = lookUp( layer.feature.properties.Type );
             } else {
               layerCopy.properties.Type = layer.feature.properties.Type;
             }
 
+            // if it does not exists add all types as possibilities
             if (
               layerCopy.properties.Status === null ||
               layerCopy.properties.Status === "null" ||
@@ -308,32 +353,30 @@ function eventJSON( geoJSON, style, editable ) {
               layerCopy.properties.Status = getFields( "status" )[ 0 ];
             }
 
-            // map._editing = true;
-
-            addJSON( layerCopy, true );
-            editPanel( layerCopy );
+            // add the layer to the database and the map, make it editable (true)
+            dbJSON( layerCopy, true );
 
           } );
       }
     } )
+    // STYLES
     .on( 'mouseover', function ( e ) {
-      var feature = this.getLayer( e.layer._leaflet_id );
-
-      feature.setStyle( {
-        color: chroma( feature.options.color )
+      // on hover take the colors and brighten + saturate them
+      e.layer.setStyle( {
+        color: chroma( e.layer.options.color )
           .brighten()
           .saturate(),
-        fillColor: chroma( feature.options.fillColor )
+        fillColor: chroma( e.layer.options.fillColor )
           .brighten()
           .saturate(),
-        opacity: feature.options.opacity * 1.2,
-        fillOpacity: feature.options.fillOpacity * 1.2,
-        weight: feature.options.weight * 1.15
+        opacity: e.layer.options.opacity * 1.2,
+        fillOpacity: e.layer.options.fillOpacity * 1.2,
+        weight: e.layer.options.weight * 1.2
       } );
     } )
+    // on mouse out reset style
     .on( 'mouseout', function ( e ) {
-      var feature = this.getLayer( e.layer._leaflet_id );
-      feature.setStyle( style );
+      e.layer.setStyle( style );
     } );
 
   return eventLayer;

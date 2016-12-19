@@ -120,4 +120,24 @@ function interface() {
       $( ".selected" )
         .removeClass( "selected" );
     } );
+
+  /*******************************************************************************
+    Enables and disables snap
+  *******************************************************************************/
+
+  $( "#snapping" )
+    .click( function () {
+      if ( $( this )
+        .hasClass( "off" ) ) {
+        snap.enable();
+        $( this )
+          .removeClass( "off" )
+          .addClass( "on" );
+      } else {
+        snap.disable();
+        $( this )
+          .removeClass( "on" )
+          .addClass( "off" );
+      }
+    } );
 }

@@ -39,6 +39,7 @@ function QueryString() {
   return query_string;
 }
 
+// turns leaflet bounds into an array;
 function bounds2Arr( bounds, reverse ) {
   if ( reverse === false ) {
     return [
@@ -53,6 +54,7 @@ function bounds2Arr( bounds, reverse ) {
   }
 }
 
+// turns an array into leaflet bounds
 function arr2bounds( arr, reverse ) {
   if ( reverse === false ) {
     return L.latLngBounds(
