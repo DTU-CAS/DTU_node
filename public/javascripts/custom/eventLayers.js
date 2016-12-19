@@ -139,8 +139,8 @@ function dbJSON( json, editable ) {
             )
             .addTo( map );
 
-          if(editable === true){
-            editPanel(json);
+          if ( editable === true ) {
+            editPanel( json );
           }
 
           // if the layer is suppose to be editable, remove it from guidelayers
@@ -175,17 +175,17 @@ function eventJSON( geoJSON, style, editable ) {
   map.closePopup();
   // creates the layer and add style
   var eventLayer = L.geoJSON( geoJSON, {
-      "style": style
-    } )
+    "style": style
+  } )
 
-    /*******************************************************************************
-        CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK
-    *******************************************************************************/
-    .on( 'click', function ( e ) {
+  /*******************************************************************************
+      CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK
+  *******************************************************************************/
+  .on( 'click', function ( e ) {
 
       // set up variables
       var layer = e.layer,
-          feature = layer.feature;
+        feature = layer.feature;
 
       // pan to layer
       map.panTo( layer.getCenter() );
@@ -218,7 +218,8 @@ function eventJSON( geoJSON, style, editable ) {
         $( "#editGeom" )
           .click( function () {
             // If we are starting an editing session
-            if ( $( this ).hasClass( "disabled-edit" ) ) {
+            if ( $( this )
+              .hasClass( "disabled-edit" ) ) {
               $( this )
                 .removeClass( "disabled-edit" )
                 .addClass( "enabled-edit" );
@@ -243,7 +244,7 @@ function eventJSON( geoJSON, style, editable ) {
               // open the editPanel (Edit attributes)
               editPanel( feature );
 
-            // if we are ending the editing session
+              // if we are ending the editing session
             } else {
               // disable editing
               layer.toggleEdit();
@@ -315,7 +316,7 @@ function eventJSON( geoJSON, style, editable ) {
             disableEdits();
           } );
 
-      // If it is not suppose to be editable:
+        // If it is not suppose to be editable:
       } else {
 
         // COPY GEOMETRY

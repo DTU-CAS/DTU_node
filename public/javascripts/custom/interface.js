@@ -21,7 +21,9 @@ function interface() {
           .animate( {
             width: 0,
             opacity: 0
-          }, 'fast' );
+          }, 'fast', function(){
+            updateLegend();
+          });
 
       } else {
         $( this )
@@ -38,7 +40,9 @@ function interface() {
           .animate( {
             width: 250,
             opacity: 1
-          }, 'fast' );
+          }, 'fast', function(){
+            updateLegend();
+          });
 
       }
     } );

@@ -25,6 +25,45 @@ body > p{
   flex-direction: row-reverse;
 }
 
+.table-container{
+  z-index: 901;
+  width: 250px;
+  min-height: 100%;
+  color: #fff;
+  position: absolute;
+  left: 0;
+  text-align: center;
+}
+
+.legend-color {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  min-width: 10px !important;
+  box-shadow: -3px 0px 7px rgba(0, 0, 0, 0.45);
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  -o-user-select: none;
+  user-select: none;  
+}
+
+.legend-name{
+  font-size: small;
+  margin-left: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background: #252830;
+  box-shadow: -3px 0px 7px rgba(0, 0, 0, 0.45);
+  cursor: default;
+  -webkit-user-select: none; /* Chrome/Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+ */
+  -o-user-select: none;
+  user-select: none;
+}
+
 #input {
   z-index: 901;
   width: 250px;

@@ -127,9 +127,11 @@ function init() {
     map
       .on( 'layeradd', function ( e ) {
         snap.addGuide(e.layer);
+        updateLegend();
       } )
       .on( 'layerremove', function ( e ) {
         snap.removeGuide( e.layer );
+        updateLegend();
       } )
       .on( "editable:enable", function ( e ) {
         map._editing = e.layer._leaflet_id;
@@ -241,6 +243,13 @@ function init() {
     // function is from layerFunctions.js
     add2LayerList( "Bygninger", dtuByg );
     add2LayerList( "Bygninger - Labels", labels );
+
+    // LEGEND
+    updateLegend();
+
+
+
+
 
     // Start loading the interface
     interface();
