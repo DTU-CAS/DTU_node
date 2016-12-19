@@ -1,53 +1,53 @@
-*{
+* {
   font-family: 'Open Sans', arial, sans-serif;
 }
 
-html, body{
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-  margin:0;
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
 }
 
-#interface{
+#interface {
   width: 100%;
-  height:100%;
-  overflow:hidden;
-  background:#252830;
+  height: 100%;
+  overflow: hidden;
+  background: #252830;
   display: flex;
   flex-direction: row-reverse;
 }
 
-#input{
+#input {
   z-index: 901;
   width: 250px;
   min-height: 100%;
   color: #fff;
   box-shadow: -3px 0px 7px rgba(0, 0, 0, 0.45);
   text-align: center;
-  background:#252830;
+  background: #252830;
   color: #fff;
 }
 
 #map {
   flex: 1;
   min-height: 100%;
-  background:#fff;
- }
+  background: #fff;
+}
 
- #send{
-   background: #12ab81;
-   width: 160px;
-   color: white;
-   padding: 2px;
-   font-weight: bolder;
-   cursor: pointer;
-   margin-left: 40px;
-   margin-top: 70px;
-   box-shadow: 0 2px 5px rgba(0,0,0,0.4);
- }
+#send {
+  background: #12ab81;
+  width: 160px;
+  color: white;
+  padding: 2px;
+  font-weight: bolder;
+  cursor: pointer;
+  margin-left: 40px;
+  margin-top: 70px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
 
-#openHide{
+#openHide {
   position: absolute;
   top: 50%;
   right: 250px;
@@ -56,7 +56,8 @@ html, body{
   width: 38px;
   border-radius: 90px 0 0 90px;
   -moz-border-radius: 90px 0 0 90px;
-  -webkit-border-radius: 90px 0 0 90px;;
+  -webkit-border-radius: 90px 0 0 90px;
+  ;
   color: white;
   opacity: 0.75;
   background: #252830;
@@ -66,16 +67,16 @@ html, body{
   -webkit-transition: background-color .2s;
 }
 
-#openHide:hover{
+#openHide:hover {
   background: #434857;
 }
 
-#openHide > i {
+#openHide>i {
   margin-top: 20px;
   margin-left: 18px;
 }
 
-#editButtons > .title{
+#editButtons>.title {
   background: #10b47b;
   margin: 0;
   margin-right: -4px;
@@ -84,21 +85,21 @@ html, body{
   border-bottom: 1px solid #fff;
 }
 
-.main{
+.main {
   position: relative;
   z-index: 9001;
   display: block !important;
 }
 
-.theme{
+.theme {
   display: none;
 }
 
-.logo{
+.logo {
   display: none;
 }
 
-.logo > img{
+.logo>img {
   position: relative;
   width: 220px;
   text-align: center;
@@ -108,13 +109,13 @@ html, body{
   margin-bottom: 10px;
 }
 
- #menu{
-   background: #1f2025;
-   height: 40px;
-   white-space: nowrap;
- }
+#menu {
+  background: #1f2025;
+  height: 40px;
+  white-space: nowrap;
+}
 
-.menu-item{
+.menu-item {
   height: 30px;
   margin-top: 10px;
   width: 110px;
@@ -135,47 +136,43 @@ html, body{
   -webkit-box-sizing: border-box;
 }
 
-.menu-selected{
+.menu-selected {
   background: #1ca8dd;
   border-bottom: none !important;
 }
 
-.menu-selected:hover{
+.menu-selected:hover {
   background: #1ca8dd !important;
 }
 
-.menu-item:hover{
+.menu-item:hover {
   background: #1f6b88;
 }
 
-.menu-item > p{
+.menu-item>p {
   margin: 0;
   margin-top: 4px;
 }
 
-#editButtons{
+#editButtons {
   margin-left: 40px;
   margin-top: 30px;
   width: 160px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-#editButtons > div {
+#editButtons>div {
   background: #434857;
   margin-top: 2px;
   width: 160px;
   padding: 2px;
 }
 
-#editButtons > div > p {
+#editButtons>div>p {
   font-size: smaller;
 }
 
-#editButtons > div:hover,
-#editGeom:hover,
-#deleteGeom:hover,
-#addCollumn:hover,
-#copyGeom:hover{
+#editButtons>div:hover, #editGeom:hover, #deleteGeom:hover, #addCollumn:hover, #copyGeom:hover {
   transition: all .15s ease-in-out;
   -moz-transition: all .15s ease-in-out;
   -webkit-transition: all .15s;
@@ -183,74 +180,68 @@ html, body{
   cursor: pointer;
 }
 
-#editGeom,
-#deleteGeom,
-#addCollumn,
-#copyGeom{
+#editGeom, #deleteGeom, #addCollumn, #copyGeom {
   background: #434857;
   padding: 6px;
   width: 100px;
   height: 18px;
   text-align: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 
-#editGeom{
+#editGeom {
   margin-top: 10px;
   margin-bottom: 4px;
 }
 
-#deleteGeom{
+#deleteGeom {
   margin-top: -34px;
   margin-left: 134px;
   margin-bottom: 4px;
 }
 
-#copyGeom{
+#copyGeom {
   margin-top: 10px;
 }
 
-#addCollumn{
+#addCollumn {
   margin-top: 10px;
   margin-bottom: 4px;
   background: #434857;
 }
 
-#deleteGeom > p,
-#addCollumn > p,
-#editGeom > p,
-#copyGeom > p{
+#deleteGeom>p, #addCollumn>p, #editGeom>p, #copyGeom>p {
   margin: 0;
 }
 
-#input > p{
+#input>p {
   color: #888;
 }
 
-#wfsLayers{
+#wfsLayers {
   margin-top: 25px;
 }
 
-#layers, .layer-list{
+#layers, .layer-list {
   list-style: none;
   text-align: left;
   font-size: smaller;
   max-width: 160px;
 }
 
-.layer{
+.layer {
   background: #434857;
   padding: 8px;
   margin-top: 2px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-.layer > p{
+.layer>p {
   margin: 0;
 }
 
-.layer:hover{
+.layer:hover {
   background: #187a59;
   cursor: pointer;
   transition: all .10s ease-in-out;
@@ -258,25 +249,26 @@ html, body{
   -webkit-transition: all .10s;
 }
 
-.off{
+.off {
   background: #e64759 !important;
 }
-.on, .layer-on{
+
+.on, .layer-on {
   background: #10b47b !important;
 }
 
-.layer-off{
+.layer-off {
   /*background: #434857 !important;*/
 }
 
-#wfsLayers > p, #wmsLayers > p{
+#wfsLayers>p, #wmsLayers>p {
   white-space: nowrap;
   text-align: left;
   margin-left: 40px;
   margin-bottom: -6px;
 }
 
-#snapping, #getFeatureInfo{
+#snapping, #getFeatureInfo {
   transition: all .10s ease-in-out;
   -moz-transition: all .10s ease-in-out;
   -webkit-transition: all .10s;
@@ -284,13 +276,13 @@ html, body{
   padding: 8px;
   margin-left: 40px;
   margin-top: 36px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
   text-align: left;
 }
 
-#bygID{
+#bygID {
   background: #252830;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
   position: relative;
   display: block;
   bottom: 2px;
@@ -302,26 +294,28 @@ html, body{
   z-index: 1002;
 }
 
-#bygID > p{
+#bygID>p {
   margin: 0;
   margin-top: 10px;
   padding-top: 6px;
   font-weight: bolder;
 }
 
-#snapping > p{
-  text-align:center;
+#snapping>p {
+  text-align: center;
   /*padding-left: 42px;*/
 }
-#getFeatureInfo > p{
+
+#getFeatureInfo>p {
   padding-left: 26px;
 }
-#snapping > p, #getFeatureInfo > p{
+
+#snapping>p, #getFeatureInfo>p {
   margin: 0;
   font-size: smaller;
 }
 
-#snapping:hover, #getFeatureInfo:hover{
+#snapping:hover, #getFeatureInfo:hover {
   cursor: pointer;
 }
 
@@ -333,17 +327,17 @@ html, body{
   white-space: nowrap;
 }
 
-.selected{
+.selected {
   background: #208eb8 !important;
 }
 
-.unselectable{
+.unselectable {
   pointer-events: none !important;
   opacity: 0.60;
   cursor: not-allowed !important;
 }
 
-.idTag{
+.idTag {
   margin-top: 30px;
   color: #888;
   white-space: nowrap;
@@ -351,13 +345,13 @@ html, body{
   margin-left: 40px;
 }
 
-.dropDown > p{
- cursor: pointer;
- padding-left: 6px !important;
- padding-right: 6px !important;
+.dropDown>p {
+  cursor: pointer;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
 }
 
-.dropDown:hover{
+.dropDown:hover {
   background: #1ca8dd;
 }
 
@@ -369,37 +363,39 @@ html, body{
   min-width: 160px;
   overflow: auto;
   z-index: 901;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-.dropDown-content > ul{
+.dropDown-content>ul {
   list-style: none;
   margin: 0;
   padding-top: 10px;
   padding-bottom: 10px;
 }
 
-.dropDown-content > ul > li{
+.dropDown-content>ul>li {
   margin-left: -40px;
   padding-left: 16px;
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-.dropDown-content > ul > li:hover{
+.dropDown-content>ul>li:hover {
   cursor: pointer;
   background: #1ca8dd;
 }
 
-.show {display:block;}
+.show {
+  display: block;
+}
 
-@media (max-width:700px){
-  #bygID{
+@media (max-width:700px) {
+  #bygID {
     display: none;
   }
 }
 
-.infoEdit{
+.infoEdit {
   position: absolute;
   height: auto;
   display: block;
@@ -414,7 +410,27 @@ html, body{
   padding: 10px;
 }
 
-#attrSelections{
+#infoHeadling{
+  background: #1ca8dd;
+}
+
+#infoHeadling > p{
+  text-align: center;
+  font-size: medium;
+  margin-top: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.editRow > .attribute:hover{
+  background: #1ca8dd;
+}
+
+.table-row{
+  cursor: default;
+}
+
+#attrSelections {
   transition: all .10s ease-in-out;
   -moz-transition: all .10s ease-in-out;
   -webkit-transition: all .10s;
@@ -425,26 +441,26 @@ html, body{
   bottom: 0;
   color: #fff;
   background: #3e4149;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 
-.slide-menu{
+.slide-menu {
   position: absolute;
   height: auto;
   width: 100px;
   background: #3e4149;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
   color: white;
   left: 200px;
   bottom: 0px;
   z-index: 901;
 }
 
-.slide-menu > ul, #attrSelections > ul{
+.slide-menu>ul, #attrSelections>ul {
   list-style: none;
 }
 
-.slide-menu > ul > li, #attrSelections > ul > li{
+.slide-menu>ul>li, #attrSelections>ul>li {
   list-style: none;
   margin-left: -40px;
   padding-left: 10px;
@@ -453,11 +469,11 @@ html, body{
   margin-bottom: 4px;
 }
 
-.slide-menu > ul > li:hover, #attrSelections > ul > li:hover{
+.slide-menu>ul>li:hover, #attrSelections>ul>li:hover {
   background: #1ca8dd;
-  cursor:pointer;
+  cursor: pointer;
 }
 
-.hoverPointer{
+.hoverPointer {
   cursor: pointer;
 }

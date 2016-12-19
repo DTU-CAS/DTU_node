@@ -1,55 +1,62 @@
   // Connecting and interactiving with the database
   // Author: Casper Fibaek - NIRAS
-  // rewrite this as a simple API
-  db=({
+
+  db = ( {
     // Test if the database is connected
     // e.g.: db.test()
-    test: function(){
-      $.ajax({
+    test: function () {
+      $.ajax( {
           type: "GET",
           url: '/api/test',
           dataType: "json"
-      }).done(function (res) {
-          console.log(res);
-      }).fail(function (jqXHR, status, error) {
-          console.log("AJAX call failed: " + status + ", " + error);
-      });
+        } )
+        .done( function ( res ) {
+          console.log( res );
+        } )
+        .fail( function ( jqXHR, status, error ) {
+          console.log( "AJAX call failed: " + status + ", " + error );
+        } );
     },
 
-    latest: function(){
-      $.ajax({
+    latest: function () {
+      $.ajax( {
           type: "GET",
           url: '/api/latest/',
           dataType: "json"
-      }).done(function (res) {
-          console.log(res);
+        } )
+        .done( function ( res ) {
+          console.log( res );
           return res;
-      }).fail(function (jqXHR, status, error) {
-          console.log("AJAX call failed: " + status + ", " + error);
-      });
+        } )
+        .fail( function ( jqXHR, status, error ) {
+          console.log( "AJAX call failed: " + status + ", " + error );
+        } );
 
     },
-    get: function(str_projectID){
-      $.ajax({
+    get: function ( str_projectID ) {
+      $.ajax( {
           type: "GET",
           url: '/api/get/' + str_projectID,
           dataType: "json"
-      }).done(function (res) {
-          if(res.length === 0){
-            console.log("Nothing returned from database");
+        } )
+        .done( function ( res ) {
+          if ( res.length === 0 ) {
+            console.log( "Nothing returned from database" );
           } else {
-            console.log("Geometries added to the map: " + res.length);
-            for(var i = 0; i < res.length; i++){
-              console.log(res[i]);
+            console.log( "Geometries added to the map: " + res.length );
+            for ( var i = 0; i < res.length; i++ ) {
+              console.log( res[ i ] );
 
-              L.geoJSON(res[i]).addTo(map);
+              L.geoJSON( res[ i ] )
+                .addTo( map );
 
 
             }
           }
-      }).fail(function (jqXHR, status, error) {
-          console.log("AJAX call failed: " + status + ", " + error);
-      });
+        } )
+        .fail( function ( jqXHR, status, error ) {
+          console.log( "AJAX call failed: " + status + ", " + error );
+        } );
     },
     /*
      DELETE GEOMETRY (ProjectID / CG_ID)
@@ -61,16 +68,18 @@
           db.delete('ALL', 'NULL')
           db.delete('ALL', 273)
     */
-    delete: function(prj_id, geom_id){
-      $.ajax({
+    delete: function ( prj_id, geom_id ) {
+      $.ajax( {
           type: "GET",
           url: '/api/delete/' + prj_id + '/' + geom_id,
           dataType: "json"
-      }).done(function (res) {
-          console.log(res);
-      }).fail(function (jqXHR, status, error) {
-          console.log("AJAX call failed: " + status + ", " + error);
-      });
+        } )
+        .done( function ( res ) {
+          console.log( res );
+        } )
+        .fail( function ( jqXHR, status, error ) {
+          console.log( "AJAX call failed: " + status + ", " + error );
+        } );
     },
 
     /* UPDATE DATABASE Matches on CG_ID
@@ -80,97 +89,103 @@
          Status: "Ongoing"
        }
     */
-    update: function(obj){
+    update: function ( obj ) {
       var updateString = 'SET ';
       var newKeys = 0;
 
-      for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          if(
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty( key ) ) {
+          if (
             key !== "CG_ID" &&
             key !== "CG_GEOMETRY" &&
             key !== "WKT" &&
             key !== "ID"
-          ){
-            updateString += key + " = '" + obj[key] + "', ";
+          ) {
+            updateString += key + " = '" + obj[ key ] + "', ";
             newKeys += 1;
           }
         }
       }
 
-      if(newKeys > 0){
-        updateString = updateString.slice(0, -2);
+      if ( newKeys > 0 ) {
+        updateString = updateString.slice( 0, -2 );
       }
 
       var postObj = {
         CG_ID: obj.CG_ID,
         request: updateString,
-        geometry: JSON.stringify(obj.CG_GEOMETRY)
+        geometry: JSON.stringify( obj.CG_GEOMETRY )
       };
 
-      if(postObj.CG_ID === 'undefined' || postObj.CG_ID === undefined){
-        $.ajax({
+      if ( postObj.CG_ID === 'undefined' || postObj.CG_ID === undefined ) {
+        $.ajax( {
             type: "GET",
             url: '/api/latest/',
             dataType: "json"
-        }).done(function (res) {
-            console.log(res);
+          } )
+          .done( function ( res ) {
+            console.log( res );
             postObj.CG_ID = res;
-            updateDB(postObj);
-        }).fail(function (jqXHR, status, error) {
-            console.log("AJAX call failed: " + status + ", " + error);
-        });
+            updateDB( postObj );
+          } )
+          .fail( function ( jqXHR, status, error ) {
+            console.log( "AJAX call failed: " + status + ", " + error );
+          } );
       }
 
-      function updateDB(object){
-        $.ajax({
-          type: "POST",
-          url: '/api/update/',
-          dataType: "json",
-          data: postObj
-        }).done(function (res){
-          console.log(res);
-        }).fail(function (jqXHR, status, error){
-          console.log("AJAX call failed: ", jqXHR);
-        });
+      function updateDB( object ) {
+        $.ajax( {
+            type: "POST",
+            url: '/api/update/',
+            dataType: "json",
+            data: postObj
+          } )
+          .done( function ( res ) {
+            console.log( res );
+          } )
+          .fail( function ( jqXHR, status, error ) {
+            console.log( "AJAX call failed: ", jqXHR );
+          } );
       }
 
-      updateDB(postObj);
+      updateDB( postObj );
 
     },
 
     // WRITE TO DATABASE ({ProjektID: "casper skrev det her"})
-    write: function(obj){
+    write: function ( obj ) {
       var keys = '';
       var values = '';
-      for (var key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          if(key !== "CG_GEOMETRY"){
+      for ( var key in obj ) {
+        if ( obj.hasOwnProperty( key ) ) {
+          if ( key !== "CG_GEOMETRY" ) {
             keys += key + ", ";
-            values += "'" + obj[key] + "', ";
+            values += "'" + obj[ key ] + "', ";
           }
         }
       }
-      keys = keys.slice(0, -2);
-      values = values.slice(0, -2);
+      keys = keys.slice( 0, -2 );
+      values = values.slice( 0, -2 );
 
       var postObj = {
         "keys": keys,
         "values": values,
-        "geometry": JSON.stringify(obj.CG_GEOMETRY)
+        "geometry": JSON.stringify( obj.CG_GEOMETRY )
       };
 
-      console.log(postObj);
+      console.log( postObj );
 
-      $.ajax({
-        type: "POST",
-        url: '/api/post/',
-        dataType: "json",
-        data: postObj
-      }).done(function (res){
-        console.log(res);
-      }).fail(function (jqXHR, status, error){
-        console.log("AJAX call failed: " + status + ", " + error);
-      });
+      $.ajax( {
+          type: "POST",
+          url: '/api/post/',
+          dataType: "json",
+          data: postObj
+        } )
+        .done( function ( res ) {
+          console.log( res );
+        } )
+        .fail( function ( jqXHR, status, error ) {
+          console.log( "AJAX call failed: " + status + ", " + error );
+        } );
     }
-  });
+  } );
