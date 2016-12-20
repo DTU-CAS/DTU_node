@@ -13,7 +13,9 @@ function add2LayerList( name, layer ) {
           .addClass( "layer-on" );
         map.addLayer( layer );
       }
-    } );
+      updateLegend();
+    }
+  );
   $( "#layers" )
     .append( listItem );
 }
@@ -38,7 +40,7 @@ function addWMSlayer( string, name ) {
   add2LayerList( name, layer );
 }
 
-function addWfsLayer( string, name, style, editable ) {
+function addWfsLayer( string, name, editable ) {
   var wfsBase = "http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?";
   var wfsParams = {
     Site: 'Provider',
@@ -61,7 +63,7 @@ function addWfsLayer( string, name, style, editable ) {
 
       // add the layer to the map
       // function is from eventLayers.js
-      var layer = eventJSON( geom, style, editable );
+      var layer = eventJSON( geom, editable );
 
       // whether or not it should be possible to edit the layer
       if(editable === false){

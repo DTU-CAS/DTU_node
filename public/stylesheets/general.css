@@ -46,7 +46,7 @@ body > p{
   -moz-user-select: none; /* Firefox */
   -ms-user-select: none; /* IE10+ */
   -o-user-select: none;
-  user-select: none;  
+  user-select: none;
 }
 
 .legend-name{
@@ -453,17 +453,20 @@ body > p{
   background: #252830;
   color: #fff;
   font-size: smaller;
-  padding: 10px;
+  padding: 14px;
 }
 
 #infoHeadling{
   background: #1ca8dd;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 #infoHeadling > p{
   text-align: center;
   font-size: medium;
   margin-top: 4px;
+  margin-bottom: 6px;
   padding-top: 2px;
   padding-bottom: 2px;
 }

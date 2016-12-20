@@ -7,6 +7,7 @@ function disableEdits() {
     if ( layer.editor ) {
       if ( layer.editor._enabled === true ) {
         layer.toggleEdit();
+        var layerStyle;
 
         // update the layer attributes to correspond with the "rediger attributer table"
         $( "#infoTable > tr > .key" )
@@ -48,6 +49,23 @@ function disableEdits() {
           // add to snap layer and update database
           snap.addGuideLayer( layer );
           db.update( updateObj );
+
+          // update legend
+          updateLegend();
+
+          if(layer.feature.properties){
+            if (layer.feature.properties.Type){
+              var type = layer.feature.properties.Type;
+              if ( l_styles[ type ]  ){
+                layerStyle = l_styles[ type ];
+              } else {
+                layerStyle = l_styles[ lookUp(type) ];
+              }
+            }
+          } else {
+            layerStyle = l_styles.Standard;
+          }
+          layer.setStyle( layerStyle );
         }
       }
     }
@@ -67,12 +85,10 @@ function dbJSON( json, editable ) {
 
   // takes the URL parameters and add to the newly created layer
   json.properties = {
-    "ProjektID": QueryString()
-      .ID,
-    "Type": getFields( projektType )[ 0 ],
-    "Navn": QueryString()
-      .NAME,
-    "Status": getFields( "status" )[ 0 ]
+    "ProjektID": QueryString().ID,
+    "Navn": QueryString().NAME,
+    "Status": getFields( "status" )[ 0 ],
+    "Type": json.properties.Type
   };
 
   // prepares the layer for upload to the database.
@@ -134,9 +150,7 @@ function dbJSON( json, editable ) {
 
           // add the layer to the map
           // TODO: change style to match type
-          var addLayer = eventJSON( json, style.Standard,
-              true
-            )
+          var addLayer = eventJSON( json, true)
             .addTo( map );
 
           if ( editable === true ) {
@@ -170,19 +184,20 @@ function dbJSON( json, editable ) {
 /*
   Takes a normal geoJSON and adds custom events
 */
-function eventJSON( geoJSON, style, editable ) {
+function eventJSON( geoJSON, editable ) {
   // if a popup is already open, close it.
   map.closePopup();
-  // creates the layer and add style
-  var eventLayer = L.geoJSON( geoJSON, {
-    "style": style
-  } )
+
+  // defined at the end.
+  var layerStyle = l_styles.Standard;
+
+  // creates the layer add style at end
+  var eventLayer = L.geoJSON( geoJSON )
 
   /*******************************************************************************
       CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK
   *******************************************************************************/
   .on( 'click', function ( e ) {
-
       // set up variables
       var layer = e.layer,
         feature = layer.feature;
@@ -300,6 +315,9 @@ function eventJSON( geoJSON, style, editable ) {
 
               // add the edited layer to the guide arrays
               snap.addGuideLayer( layer );
+
+              // update legend
+              updateLegend();
             }
           } );
 
@@ -325,33 +343,26 @@ function eventJSON( geoJSON, style, editable ) {
             // close popups
             map.closePopup();
 
+            // close any editing going on
+            disableEdits();
+
             // create a geojson copy
             var layerCopy = layer.toGeoJSON();
             // get all fields from styles_and_lookups.js
             var allFields = getFields( "all" );
             // add properties from URL parameters
-            layerCopy.properties = {
-              "ProjektID": QueryString()
-                .ID,
-              "Navn": QueryString()
-                .NAME,
-            };
 
-            // if the type exists look it up and add it
-            if ( allFields.indexOf( layer.feature.properties.Type === -1 ) ) {
-              layerCopy.properties.Type = lookUp( layer.feature.properties.Type );
+            if(lookUp(layer.feature.properties.Type) !== "undefined"){
+              layerCopy.properties.Type = lookUp(layer.feature.properties.Type);
             } else {
               layerCopy.properties.Type = layer.feature.properties.Type;
             }
 
-            // if it does not exists add all types as possibilities
-            if (
-              layerCopy.properties.Status === null ||
-              layerCopy.properties.Status === "null" ||
-              layerCopy.properties.Status === "undefined" ||
-              layerCopy.properties.Status === undefined
-            ) {
-              layerCopy.properties.Status = getFields( "status" )[ 0 ];
+            if(
+              layerCopy.properties.Type === "undefined" ||
+              layerCopy.properties.Type === undefined
+            ){
+              layerCopy.properties.Type = "undefined";
             }
 
             // add the layer to the database and the map, make it editable (true)
@@ -364,12 +375,14 @@ function eventJSON( geoJSON, style, editable ) {
     .on( 'mouseover', function ( e ) {
       // on hover take the colors and brighten + saturate them
       e.layer.setStyle( {
-        color: chroma( e.layer.options.color )
+        color: "rgba(" + chroma( e.layer.options.color )
           .brighten()
-          .saturate(),
-        fillColor: chroma( e.layer.options.fillColor )
+          .saturate()
+          .rgba() + ")",
+        fillColor: "rgba(" + chroma( e.layer.options.fillColor )
           .brighten()
-          .saturate(),
+          .saturate()
+          .rgba() + ")",
         opacity: e.layer.options.opacity * 1.2,
         fillOpacity: e.layer.options.fillOpacity * 1.2,
         weight: e.layer.options.weight * 1.2
@@ -377,8 +390,34 @@ function eventJSON( geoJSON, style, editable ) {
     } )
     // on mouse out reset style
     .on( 'mouseout', function ( e ) {
-      e.layer.setStyle( style );
+      if(e.layer.feature.properties){
+        if (e.layer.feature.properties.Type){
+          var type = e.layer.feature.properties.Type;
+          if ( l_styles[ type ]  ){
+            e.layer.setStyle( l_styles[ type ]);
+          } else {
+            e.layer.setStyle( l_styles[ lookUp(type) ] );
+          }
+        }
+      } else {
+        e.layer.setStyle( l_styles.Undefined );
+      }
     } );
+
+  // console.log(layerStyle);
+  eventLayer.eachLayer(function(layer){
+    if(layer.feature.properties){
+      if (layer.feature.properties.Type){
+        var type = layer.feature.properties.Type;
+        if ( l_styles[ type ]  ){
+          layerStyle = l_styles[ type ];
+        } else {
+          layerStyle = l_styles[ lookUp(type) ];
+        }
+      }
+    }
+    layer.setStyle( layerStyle );
+  });
 
   return eventLayer;
 }

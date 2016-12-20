@@ -157,16 +157,34 @@ function init() {
         e.latlng.lat = latlng.lat;
         e.latlng.lng = latlng.lng;
       } )
+      // This only fires when an original drawing is done.
       .on( 'editable:drawing:end', function ( e ) {
         this.off( 'mousemove', followMouse );
         snapMarker.remove();
         if ( e.layer._parts ) {
           if ( e.layer._parts.length > 0 ) {
             // function is from eventLayers.js
-            dbJSON( e.layer.toGeoJSON() );
+
+            var layer2create = e.layer.toGeoJSON();
+            var selected = $(".lastSelected").attr("ref");
+
+            if(selected === 'undefined'){
+              layer2create.properties.Type = "Parkering";
+            } else if (selected === "byggeri"){
+              layer2create.properties.Type = "Midlertidig bygning";
+            } else if (selected === "byggeplads"){
+              layer2create.properties.Type = "Byggeplads";
+            } else if (selected === "pakering"){
+              layer2create.properties.Type = "Parkering";
+            } else if (selected === "adgangsvej"){
+              layer2create.properties.Type = "Midlertidig gangsti";
+            }
+
+            dbJSON( layer2create );
             map.removeLayer( e.layer );
             $( ".selected" )
               .removeClass( "selected" );
+            updateLegend();
           }
         }
       } );
@@ -185,18 +203,18 @@ function init() {
 
         // add the layer with a standard style
         // function is from eventLayers.js
-        var addLayer = eventJSON( data[ i ], style.Standard, true )
+        var addLayer = eventJSON( data[ i ], true )
           .addTo( map );
       }
     } );
 
     // WFS layers: layername, displayname, style, editable
     // functions are from layerFunctions.js
-    addWfsLayer( "ugis:T6832", "Byggepladser", style.Byggepladser, false );
-    addWfsLayer( "ugis:T6834", "Parkering", style.Parkering, false );
-    addWfsLayer( "ugis:T6831", "Adgangsveje", style.Adgangsveje, false );
-    addWfsLayer( "ugis:T6833", "Ombyg og Renovering", style[ "Ombyg og Renovering" ], false );
-    addWfsLayer( "ugis:T7418", "Nybyggeri", style.Nybyggeri, false );
+    addWfsLayer( "ugis:T6832", "Byggepladser", false );
+    addWfsLayer( "ugis:T6834", "Parkering", false );
+    addWfsLayer( "ugis:T6831", "Adgangsveje", false );
+    addWfsLayer( "ugis:T6833", "Ombyg og Renovering", false );
+    addWfsLayer( "ugis:T7418", "Nybyggeri", false );
     addWMSlayer( "18454", "Streetfood" );
 
     /*******************************************************************************
@@ -206,7 +224,12 @@ function init() {
     var labels = L.layerGroup();
 
     // function is from eventLayers.js
-    var dtuByg = eventJSON( dtu_bygninger, style.Bygninger, false );
+    var stpByg = L.geoJSON( dtu_bygninger );
+    stpByg.eachLayer(function(layer){
+      layer.feature.properties.Type = "Bygninger";
+    });
+
+    var dtuByg = eventJSON( stpByg.toGeoJSON(), false );
     // Loop through buildings and create labels
     dtuByg.eachLayer( function ( layer ) {
 
@@ -247,10 +270,6 @@ function init() {
     // LEGEND
     updateLegend();
 
-
-
-
-
     // Start loading the interface
     interface();
 
@@ -260,6 +279,6 @@ function init() {
   } else {
     jQuery( "body" )
       .empty()
-      .html( "<p> Wrong URL parameters </p>" );
+      .html( "<p> Invalid URL parameters </p>" );
   }
 }
