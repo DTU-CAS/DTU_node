@@ -3,6 +3,13 @@
   if a layer is being edited, stop editing and update the database
 */
 function disableEdits() {
+  if($(".infoEdit").length > 0){
+    map._attrEdit = {
+      left: $(".infoEdit").position().left,
+      top: $(".infoEdit").position().top
+    };
+  }
+
   map.eachLayer( function ( layer ) {
     if ( layer.editor ) {
       if ( layer.editor._enabled === true ) {
@@ -141,7 +148,7 @@ function dbJSON( json, editable ) {
           dataType: "json"
         } )
         .done( function ( res ) {
-          console.log( res );
+          console.log( "latest", res );
           // translate the wellknown text to JSON
           var wkt = new Wkt.Wkt();
           wkt.read( JSON.stringify( json ) )
@@ -157,6 +164,8 @@ function dbJSON( json, editable ) {
           if ( editable === true ) {
             editPanel( json );
           }
+
+          updateLegend();
 
           // if the layer is suppose to be editable, remove it from guidelayers
           // and enable edits.
@@ -375,19 +384,26 @@ function eventJSON( geoJSON, editable ) {
     // STYLES
     .on( 'mouseover', function ( e ) {
       // on hover take the colors and brighten + saturate them
-      e.layer.setStyle( {
-        color: "rgba(" + chroma( e.layer.options.color )
-          .brighten()
-          .saturate()
-          .rgba() + ")",
-        fillColor: "rgba(" + chroma( e.layer.options.fillColor )
-          .brighten()
-          .saturate()
-          .rgba() + ")",
-        opacity: e.layer.options.opacity * 1.2,
-        fillOpacity: e.layer.options.fillOpacity * 1.2,
-        weight: e.layer.options.weight * 1.2
-      } );
+      if(e.layer.feature.properties){
+        if(
+          e.layer.feature.properties.Type !== undefined &&
+          e.layer.feature.properties.Type !== "undefined"
+        ){
+          e.layer.setStyle( {
+            color: "rgba(" + chroma( e.layer.options.color )
+            .brighten()
+            .saturate()
+            .rgba() + ")",
+            fillColor: "rgba(" + chroma( e.layer.options.fillColor )
+            .brighten()
+            .saturate()
+            .rgba() + ")",
+            opacity: e.layer.options.opacity * 1.15,
+            fillOpacity: e.layer.options.fillOpacity * 1.25,
+            weight: e.layer.options.weight * 1.2
+          } );
+        }
+      }
     } )
     // on mouse out reset style
     .on( 'mouseout', function ( e ) {

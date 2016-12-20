@@ -5,13 +5,15 @@
 function updateLegend() {
   $( ".legend" )
     .empty();
-  addedlayers = [];
+  $( "#text-bg" )
+    .remove();
+  map._legendLayers = [];
 
   map.eachLayer( function ( layer ) {
     if ( layer instanceof L.Path ) {
-      if ( layer.options && layer.feature.properties) {
-        if ( addedlayers.indexOf( layer.feature.properties.Type ) === -1 ) {
-          addedlayers.push( layer.feature.properties.Type );
+      if ( layer.options && layer.feature.properties ) {
+        if ( map._legendLayers.indexOf( layer.feature.properties.Type ) === -1 ) {
+          map._legendLayers.push( layer.feature.properties.Type );
 
           var st = layer.options;
 
@@ -31,13 +33,13 @@ function updateLegend() {
           var type;
           var postText;
 
-          if(abbr(layer.feature.properties.Type) === true){
-            type = String(lookUp(layer.feature.properties.Type));
+          if ( abbr( layer.feature.properties.Type ) === true ) {
+            type = String( lookUp( layer.feature.properties.Type ) );
           } else {
-            type = String(layer.feature.properties.Type);
+            type = String( layer.feature.properties.Type );
           }
 
-          if(st.dashArray){
+          if ( st.dashArray ) {
             dash = "dashed";
           } else {
             dash = "solid";
@@ -47,7 +49,7 @@ function updateLegend() {
             .css( "border", st.weight + "px " + dash + " " + borderColor )
             .css( "background", fillColor );
 
-          if(layer.feature.properties.DTUbygnnr){
+          if ( layer.feature.properties.DTUbygnnr ) {
             text = $( "<td class='legend-name'>" + "Bygninger" + "</td>" );
             postText = "Bygninger";
           } else {
@@ -56,20 +58,20 @@ function updateLegend() {
           }
 
           // If it is not already added to the legend;
-          if($(".legend-name").text().indexOf(postText) === -1){
+          if ( $( ".legend-name" )
+            .text()
+            .indexOf( postText ) === -1 ) {
             $( row )
-            .append( color )
-            .append( text );
+              .append( color )
+              .append( text );
 
             $( ".legend" )
-            .append( row );
+              .append( row );
           }
         }
       }
     }
   } );
-
-  // console.log("update legend");
 
   $( ".table-container" )
     .css( "left", $( "#map" )
@@ -77,6 +79,22 @@ function updateLegend() {
       .width() - 20 );
   $( ".table-container" )
     .css( "bottom", ( $( "#map" )
-      .height() * -1 ) + $( ".legend" )
+        .height() * -1 ) + $( ".legend" )
       .height() + 25 );
+
+  var bg = $( "<div id='text-bg'></div>" );
+  $( bg )
+    .css( "width", $( ".legend-name" )
+      .outerWidth() )
+    .css( "margin-left", $( ".legend-color" )
+      .outerWidth() + 6 )
+    .css( "height", $( ".legend" )
+      .outerHeight() )
+    .css( "margin-top", $( ".legend" )
+      .outerHeight() * -1 );
+
+  $( ".table-container" )
+    .append( bg );
+
+  console.log( "legend was created" );
 }

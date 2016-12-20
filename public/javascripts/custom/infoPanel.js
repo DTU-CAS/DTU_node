@@ -14,6 +14,11 @@ function editPanel( feature ) {
       "<div id='attrSelections'><ul></ul></div>" +
       "</div>" );
 
+  $(".infoEdit")
+    .draggable()
+    .css("left", map._attrEdit.left)
+    .css("top", map._attrEdit.top);
+
   var tr = $( "<table class='attributes'></table>" );
   for ( var key in feature.properties ) {
     if ( feature.properties.hasOwnProperty( key ) ) {
@@ -85,6 +90,7 @@ function editPanel( feature ) {
           width: "160px",
         }, 150 );
     } );
+
   $( "#info-Status" )
     .on( "click", function () {
       $( "#attrSelections" )
@@ -139,7 +145,9 @@ function addRow( key, attribute ) {
 }
 
 function infoPanel( obj, edit ) {
-  $("#editGeom, #deleteGeom, #copyGeom").off("click").remove();
+  $( "#editGeom, #deleteGeom, #copyGeom" )
+    .off( "click" )
+    .remove();
   var table = "<div id='objTable'>" + "<table class='table'>";
 
   for ( var key in obj ) {

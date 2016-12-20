@@ -24,6 +24,12 @@ function init() {
       editable: true // enables leaflet.editable
     } );
 
+    map._legendLayers = [];
+    map._attrEdit = {
+      top: 300,
+      left: 300,
+    };
+
     // GST Ortho 2016
     var GST_Ortho = L.tileLayer.wms( 'https://kortforsyningen.kms.dk/?servicename=orto_foraar', {
         login: 'qgisdk',
@@ -127,7 +133,15 @@ function init() {
     map
       .on( 'layeradd', function ( e ) {
         snap.addGuide(e.layer);
-        updateLegend();
+
+        if(e.layer.feature){
+          if(e.layer.feature.properties){
+            if(map._legendLayers.indexOf(e.layer.feature.properties.Type) === -1){
+              updateLegend();
+              console.log("added: " + e.layer.feature.properties.Type);
+            }
+          }
+        }
       } )
       .on( 'layerremove', function ( e ) {
         snap.removeGuide( e.layer );
@@ -163,9 +177,6 @@ function init() {
         snapMarker.remove();
         if ( e.layer._parts ) {
           if ( e.layer._parts.length > 0 ) {
-            // function is from eventLayers.js
-
-            console.log("fired end", e);
             var layer2create = e.layer.toGeoJSON();
             var selected = $(".lastSelected").attr("ref");
 
@@ -181,12 +192,12 @@ function init() {
               layer2create.properties.Type = "Midlertidig gangsti";
             }
 
+            // function is from eventLayers.js
             dbJSON( layer2create );
             map.removeLayer( e.layer );
-            console.log("i fired", e);
+
             $( ".selected" )
               .removeClass( "selected" );
-            updateLegend();
           }
         }
       } );
@@ -206,7 +217,8 @@ function init() {
         // add the layer with a standard style
         // function is from eventLayers.js
         var addLayer = eventJSON( data[ i ], true )
-          .addTo( map );
+          .addTo( map )
+          .bringToFront();
       }
     } );
 

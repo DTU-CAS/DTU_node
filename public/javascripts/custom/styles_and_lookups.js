@@ -42,14 +42,14 @@ var l_styles = {
     color: "#000",
     fillColor: "#FF00FF",
     opacity: 1,
-    fillOpacity: 0.4,
+    fillOpacity: 0.3,
     weight: 2
   },
   "Materialelager": {
     color: "#000",
-    fillColor: "#d90ad7",
+    fillColor: "#dd3e22",
     opacity: 1,
-    fillOpacity: 0.4,
+    fillOpacity: 0.3,
     weight: 1.5,
     dashArray: "5, 5"
   },
