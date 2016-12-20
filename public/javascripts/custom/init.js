@@ -131,7 +131,7 @@ function init() {
       } )
       .on( 'layerremove', function ( e ) {
         snap.removeGuide( e.layer );
-        updateLegend();
+        snapMarker.remove();
       } )
       .on( "editable:enable", function ( e ) {
         map._editing = e.layer._leaflet_id;
@@ -165,6 +165,7 @@ function init() {
           if ( e.layer._parts.length > 0 ) {
             // function is from eventLayers.js
 
+            console.log("fired end", e);
             var layer2create = e.layer.toGeoJSON();
             var selected = $(".lastSelected").attr("ref");
 
@@ -174,7 +175,7 @@ function init() {
               layer2create.properties.Type = "Midlertidig bygning";
             } else if (selected === "byggeplads"){
               layer2create.properties.Type = "Byggeplads";
-            } else if (selected === "pakering"){
+            } else if (selected === "parkering"){
               layer2create.properties.Type = "Parkering";
             } else if (selected === "adgangsvej"){
               layer2create.properties.Type = "Midlertidig gangsti";
@@ -182,6 +183,7 @@ function init() {
 
             dbJSON( layer2create );
             map.removeLayer( e.layer );
+            console.log("i fired", e);
             $( ".selected" )
               .removeClass( "selected" );
             updateLegend();

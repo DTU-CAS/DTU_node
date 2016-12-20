@@ -50,9 +50,6 @@ function disableEdits() {
           snap.addGuideLayer( layer );
           db.update( updateObj );
 
-          // update legend
-          updateLegend();
-
           if(layer.feature.properties){
             if (layer.feature.properties.Type){
               var type = layer.feature.properties.Type;
@@ -66,10 +63,14 @@ function disableEdits() {
             layerStyle = l_styles.Standard;
           }
           layer.setStyle( layerStyle );
+
         }
       }
     }
   } );
+
+  // update legend
+  updateLegend();
 
   // remove popup menues
   $( ".infoEdit, .slide-menu" )

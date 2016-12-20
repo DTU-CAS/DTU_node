@@ -139,6 +139,7 @@ function addRow( key, attribute ) {
 }
 
 function infoPanel( obj, edit ) {
+  $("#editGeom, #deleteGeom, #copyGeom").off("click").remove();
   var table = "<div id='objTable'>" + "<table class='table'>";
 
   for ( var key in obj ) {
