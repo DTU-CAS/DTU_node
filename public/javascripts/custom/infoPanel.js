@@ -15,7 +15,14 @@ function editPanel( feature ) {
       "</div>" );
 
   $(".infoEdit")
-    .draggable()
+    .draggable({
+      start: function( event, ui ) {
+        $(".infoEdit").css("cursor", "move");
+      },
+      stop: function( event, ui ) {
+        $(".infoEdit").css("cursor", "default");
+      }
+    })
     .css("left", map._attrEdit.left)
     .css("top", map._attrEdit.top);
 
