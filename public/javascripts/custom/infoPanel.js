@@ -6,7 +6,7 @@ function editPanel( feature ) { // eslint-disable-line
   fields.push(getFields('byggeplads'))
   fields.push(getFields('adgangsvej'))
   fields.push(getFields('parkering'))
-  var allFields = getFields('all')
+  map._custom.addFields = getFields('all')
 
   $('#interface')
     .prepend(
@@ -54,7 +54,7 @@ function editPanel( feature ) { // eslint-disable-line
         .css('background', '#3e4149')
       var _thisType = $('#info-Type > .attribute')
         .text()
-      if (allFields.indexOf(_thisType) === -1) {
+      if (map._custom.addFields.indexOf(_thisType) === -1) {
         _thisType = lookUp(_thisType)
       }
       var typeList = ''
@@ -65,8 +65,8 @@ function editPanel( feature ) { // eslint-disable-line
         _thisType === null ||
         _thisType === 'null'
       ) {
-        for (var q = 0; q < allFields.length; q++) {
-          typeList += '<li>' + allFields[ q ] + '</li>'
+        for (var q = 0; q < map._custom.addFields.length; q++) {
+          typeList += '<li>' + map._custom.addFields[ q ] + '</li>'
         }
       } else {
         for (var i = 0; i < fields.length; i++) {
@@ -146,17 +146,17 @@ function editPanel( feature ) { // eslint-disable-line
     })
 }
 
-function addRow (key, attribute) {
-  return "<tr class='table-row'>" +
-    "<td class='rowName'>" + key + '</td>' +
-    '<td>' + attribute + '</td>' + '</tr>'
-}
-
 function infoPanel (obj, edit) { // eslint-disable-line
   $('#editGeom, #deleteGeom, #copyGeom')
     .off('click')
     .remove()
   var table = "<div id='objTable'>" + "<table class='table'>"
+
+  var addRow = function (key, attribute) {
+    return "<tr class='table-row'>" +
+      "<td class='rowName'>" + key + '</td>' +
+      '<td>' + attribute + '</td>' + '</tr>'
+  }
 
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {

@@ -1,19 +1,13 @@
  /* global
-    addWfsLayer
-    addWMSlayer
-    QueryString
-    add2LayerList
-    lookUp eventJSON
-    updateLegend
-    dtu_bygninger
-    loadInterface
-    dbJSON
+ gS
+ gF
+ dtu_bygninger
 */
 
 // Initialize the interface
 function init () { // eslint-disable-line
   // Query the URL for parameters
-  var query = QueryString()
+  var query = gF.queryString()
 
   // Check if the ID is correct and if the request has a NAME paramter.
   if (query.ID && query.NAME) {
@@ -77,22 +71,24 @@ function init () { // eslint-disable-line
       'Open Street Maps': OSMbasemap
     }
 
-    var overlayMaps = {
-      // ...
-    }
+    var overlayMaps = {}
 
     map._custom = {
       'editing': null,
+      'attrEdit': {
+        'left': 300,
+        'top': 300
+      },
       'layerControl': L.control.layers(basemaps, overlayMaps, {collapsed: false})
         .addTo(map),
-      'legendLayers': []
+      'legendLayers': [],
+      'snap': new L.Handler.MarkerSnap(map)
     }
 
     /*******************************************************************************
         Snapping functionality
     *******************************************************************************/
     // initialize the snapHandler as a global
-    var snap = new L.Handler.MarkerSnap(map)
 
     var snapMarker = L.marker(map.getCenter(), {
       icon: map.editTools.createVertexIcon({
@@ -112,22 +108,22 @@ function init () { // eslint-disable-line
       snapMarker.setLatLng(e.latlng)
     }
 
-    snap.watchMarker(snapMarker)
+    map._custom.snap.watchMarker(snapMarker)
 
     // custom functions to easier add remove guide layers
     // loop backwards through guide array and remove layers matching ID
-    snap.removeGuide = function (layer) {
-      for (var i = snap._guides.length - 1; i >= 0; i--) {
-        if (snap._guides[ i ]._leaflet_id === layer._leaflet_id) {
-          snap._guides.splice(i, 1)
+    map._custom.snap.removeGuide = function (layer) {
+      for (var i = map._custom.snap._guides.length - 1; i >= 0; i--) {
+        if (map._custom.snap._guides[ i ]._leaflet_id === layer._leaflet_id) {
+          map._custom.snap._guides.splice(i, 1)
         }
       }
     }
     // Add a guide that is a polygon and is not the one that is being edited
-    snap.addGuide = function (layer) {
+    map._custom.snap.addGuide = function (layer) {
       if (layer instanceof L.Path) {
-        if (map._editing !== layer._leaflet_id) {
-          snap.addGuideLayer(layer)
+        if (map._custom.editing !== layer._leaflet_id) {
+          map._custom.snap.addGuideLayer(layer)
         }
       }
     }
@@ -135,19 +131,19 @@ function init () { // eslint-disable-line
     // event listeners to add or stop snapping depending on visible layers.
     map
       .on('layeradd', function (e) {
-        snap.addGuide(e.layer)
+        map._custom.snap.addGuide(e.layer)
 
         if (e.layer.feature) {
           if (e.layer.feature.properties) {
             if (map._custom.legendLayers.indexOf(e.layer.feature.properties.Type) === -1) {
-              updateLegend()
+              gF.updateLegend()
               console.log('added: ' + e.layer.feature.properties.Type)
             }
           }
         }
       })
       .on('layerremove', function (e) {
-        snap.removeGuide(e.layer)
+        map._custom.snap.removeGuide(e.layer)
         snapMarker.remove()
       })
       .on('editable:enable', function (e) {
@@ -157,14 +153,14 @@ function init () { // eslint-disable-line
       .on('editable:disable', function (e) {
         map._custom.editing = null
         map.on('layeradd', function (e) {
-          snap.addGuide(e.layer)
+          map._custom.snap.addGuide(e.layer)
         })
       })
       .on('editable:vertex:dragstart', function (e) {
-        snap.watchMarker(e.vertex)
+        map._custom.snap.watchMarker(e.vertex)
       })
       .on('editable:vertex:dragend', function (e) {
-        snap.unwatchMarker(e.vertex)
+        map._custom.snap.unwatchMarker(e.vertex)
       })
       .on('editable:drawing:start', function () {
         this.on('mousemove', followMouse)
@@ -195,8 +191,7 @@ function init () { // eslint-disable-line
               layer2create.properties.Type = 'Midlertidig gangsti'
             }
 
-            // function is from eventLayers.js
-            dbJSON(layer2create)
+            gF.dbJSON(layer2create)
             map.removeLayer(e.layer)
 
             $('.selected')
@@ -213,11 +208,11 @@ function init () { // eslint-disable-line
         // change the type to the more readable lookup type
         if (data[ i ].properties.Type) {
           // function is from styles_andlookups.js
-          data[ i ].properties.Type = lookUp(data[ i ].properties.Type)
+          data[ i ].properties.Type = gS.lookUp(data[ i ].properties.Type)
         }
 
         // add the layer with a standard style
-        eventJSON(data[ i ], true)
+        gF.eventJSON(data[ i ], true)
           .addTo(map)
           .bringToFront()
       }
@@ -225,12 +220,12 @@ function init () { // eslint-disable-line
 
     // WFS layers: layername, displayname, style, editable
     // functions are from layerFunctions.js
-    addWfsLayer('ugis:T6832', 'Byggepladser', false)
-    addWfsLayer('ugis:T6834', 'Parkering', false)
-    addWfsLayer('ugis:T6831', 'Adgangsveje', false)
-    addWfsLayer('ugis:T6833', 'Ombyg og Renovering', false)
-    addWfsLayer('ugis:T7418', 'Nybyggeri', false)
-    addWMSlayer('18454', 'Streetfood')
+    gF.addWfsLayer('ugis:T6832', 'Byggepladser', false)
+    gF.addWfsLayer('ugis:T6834', 'Parkering', false)
+    gF.addWfsLayer('ugis:T6831', 'Adgangsveje', false)
+    gF.addWfsLayer('ugis:T6833', 'Ombyg og Renovering', false)
+    gF.addWfsLayer('ugis:T7418', 'Nybyggeri', false)
+    gF.addWMSlayer('18454', 'Streetfood')
 
     /*******************************************************************************
         Add Buildings and lables (local file) TODO: get buildings from WFS
@@ -244,7 +239,7 @@ function init () { // eslint-disable-line
       layer.feature.properties.Type = 'Bygninger'
     })
 
-    var dtuByg = eventJSON(stpByg.toGeoJSON(), false)
+    var dtuByg = gF.eventJSON(stpByg.toGeoJSON(), false)
     // Loop through buildings and create labels
     dtuByg.eachLayer(function (layer) {
       var properties = layer.feature.properties
@@ -278,19 +273,158 @@ function init () { // eslint-disable-line
 
     // add the layers to the custom layer list.
     // function is from layerFunctions.js
-    add2LayerList('Bygninger', dtuByg)
-    add2LayerList('Bygninger - Labels', labels)
+    gF.add2LayerList('Bygninger', dtuByg)
+    gF.add2LayerList('Bygninger - Labels', labels)
 
     // LEGEND
-    updateLegend()
+    gF.updateLegend()
 
-    // Start loading the loadInterface
-    loadInterface()
+    // Start loading the interface functionality
+    /*******************************************************************************
+      Functionality of open and hide button left of loadInterface.
+    *******************************************************************************/
+    $('#openHide')
+      .click(function () {
+        if ($(this)
+          .hasClass('open')) {
+          $(this)
+            .removeClass('open')
+            .addClass('closed')
+            .animate({
+              right: 0
+            }, 'fast')
+            .children()
+            .removeClass('fa-angle-double-right')
+            .addClass('fa-angle-double-left')
+
+          $('#input')
+            .animate({
+              width: 0,
+              opacity: 0
+            }, 'fast', function () {
+              gF.updateLegend()
+            })
+        } else {
+          $(this)
+            .removeClass('closed')
+            .addClass('open')
+            .animate({
+              right: 250
+            }, 'fast')
+            .children()
+            .removeClass('fa-angle-double-left')
+            .addClass('fa-angle-double-right')
+
+          $('#input')
+            .animate({
+              width: 250,
+              opacity: 1
+            }, 'fast', function () {
+              gF.updateLegend()
+            })
+        }
+      })
+
+    /*******************************************************************************
+      Functionality of the "opret" buttons
+    *******************************************************************************/
+    $('.addGeometry')
+      .click(function () {
+        gF.disableEdits()
+        if ($(this)
+          .hasClass('selected')) {
+          $('#editButtons > .selected')
+            .removeClass('selected')
+          $('#editButtons > .lastSelected')
+            .removeClass('lastSelected')
+          $(this)
+            .addClass('lastSelected')
+        } else {
+          gF.disableEdits()
+          $('#editButtons > .selected')
+            .removeClass('selected')
+          $('#editButtons > .lastSelected')
+            .removeClass('lastSelected')
+          $(this)
+            .addClass('selected')
+            .addClass('lastSelected')
+          if ($(this)
+            .attr('ref') === 'adgangsvej') {
+            // create a polyline if it is a road -
+            map.editTools.startPolyline()
+          } else {
+            // otherwise create a polygon.
+            map.editTools.startPolygon()
+          }
+        }
+      })
+
+    /*******************************************************************************
+      Hide or display the main menu items "Rediger & DTU lag"
+    *******************************************************************************/
+    $('.menu-item')
+      .click(function () {
+        if (!$(this)
+          .hasClass('menu-selected')) {
+          $('.menu-selected')
+            .removeClass('menu-selected')
+          $(this)
+            .addClass('menu-selected')
+          $('.theme')
+            .removeClass('main')
+
+          if ($(this)
+            .is('#menu-view-top')) {
+            $('#menu-view-main')
+              .addClass('main')
+          } else if ($(this)
+            .is('#menu-edit-top')) {
+            $('#menu-edit-main')
+              .addClass('main')
+          }
+        }
+      })
+
+    /*******************************************************************************
+      Disable and commit edits on "esc"-press and double click.
+    *******************************************************************************/
+    $('#map')
+      .keyup(function (e) {
+        if (e.keyCode === 27) { // esc
+          gF.disableEdits()
+          $('.selected')
+            .removeClass('selected')
+        }
+      })
+      .dblclick(function () {
+        gF.disableEdits()
+        $('.selected')
+          .removeClass('selected')
+      })
+
+    /*******************************************************************************
+      Enables and disables snap
+    *******************************************************************************/
+    $('#snapping')
+      .click(function () {
+        if ($(this)
+          .hasClass('off')) {
+          map._custom.snap.enable()
+          $(this)
+            .removeClass('off')
+            .addClass('on')
+        } else {
+          map._custom.snap.disable()
+          $(this)
+            .removeClass('on')
+            .addClass('off')
+        }
+      })
 
     /*******************************************************************************
       IF not valid ID is shown, don't load interface and display error message.
     *******************************************************************************/
   } else {
-    $('body').empty().html('<p> Invalid URL parameters </p>')
+    $('body').empty().html('<h1> Invalid URL parameters </h1>')
   }
 }

@@ -1,7 +1,7 @@
   // Connecting and interactiving with the database
   // Author: Casper Fibaek - NIRAS
 
-  var db = ({ // eslint-disable-line
+  var dB = ({ // eslint-disable-line
 
     // Test if the database is connected
     // e.g.: db.test()
