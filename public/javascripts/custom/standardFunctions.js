@@ -3,8 +3,6 @@
   dB
   Wkt
   chroma
-  editPanel
-  infoPanel
   GML2GeoJSON
 */
 var gF = { // eslint-disable-line
@@ -57,6 +55,197 @@ var gF = { // eslint-disable-line
         L.latLng(arr[ 1 ][ 1 ], arr[ 1 ][ 0 ])
       )
     }
+  },
+  // Allows you to edit the table on click
+  editPanel: function (feature) {
+    var fields = []
+    fields.push(gS.getFields('byggeri'))
+    fields.push(gS.getFields('byggeplads'))
+    fields.push(gS.getFields('parkering'))
+    fields.push(gS.getFields('adgangsvej'))
+    map._custom.addFields = gS.getFields('all')
+
+    $('#interface')
+      .prepend(
+        "<div class='infoEdit'>" +
+        "<div id='infoHeadling'><p>Rediger attributer</p></div>" +
+        "<table id='infoTable'></table>" +
+        "<div id='attrSelections'><ul></ul></div>" +
+        '</div>')
+
+    $('.infoEdit')
+      .draggable({
+        start: function (event, ui) {
+          $('.infoEdit').css('cursor', 'move')
+        },
+        stop: function (event, ui) {
+          $('.infoEdit').css('cursor', 'default')
+        }
+      })
+      .css('left', map._attrEdit.left)
+      .css('top', map._attrEdit.top)
+
+    for (var key in feature.properties) {
+      if (feature.properties.hasOwnProperty(key)) {
+        if (key === 'Type') {
+          $('#infoTable')
+            .append("<tr id='info-Type' class='editRow hoverPointer'><td class='key' ref='" + key + "'>" + key + "</td><td class='attribute' contenteditable='false'>" + String(feature.properties[ key ] + '</td></tr>'))
+        } else if (key === 'Navn') {
+          $('#infoTable')
+            .append("<tr id='info-Navn' class='editRow'><td class='key' ref='" + key + "'>" + key + "</td><td class='attribute' contenteditable='true'>" + String(feature.properties[ key ] + '</td></tr>'))
+        } else if (key === 'Status') {
+          $('#infoTable')
+            .append("<tr id='info-Status' class='editRow hoverPointer'><td class='key' ref='" + key + "'>" + key + "</td><td class='attribute' contenteditable='false'>" + String(feature.properties[ key ] + '</td></tr>'))
+        }
+      }
+    }
+
+    $('#info-Type')
+      .on('click', function () {
+        $('#attrSelections')
+          .css('left', ($('.infoEdit')
+            .width() + 20) + 'px')
+        $('.editRow')
+          .css('background', '#252830')
+        $(this)
+          .css('background', '#3e4149')
+        var _thisType = $('#info-Type > .attribute')
+          .text()
+        if (map._custom.addFields.indexOf(_thisType) === -1) {
+          _thisType = gS.lookUp(_thisType)
+        }
+        var typeList = ''
+
+        if (
+          _thisType === 'undefined' ||
+          _thisType === undefined ||
+          _thisType === null ||
+          _thisType === 'null'
+        ) {
+          for (var q = 0; q < map._custom.addFields.length; q++) {
+            typeList += '<li>' + map._custom.addFields[ q ] + '</li>'
+          }
+        } else {
+          for (var i = 0; i < fields.length; i++) {
+            for (var j = 0; j < fields[ i ].length; j++) {
+              if (fields[ i ][ j ].indexOf(_thisType) !== -1) {
+                for (var w = 0; w < fields[ i ].length; w++) {
+                  typeList += '<li>' + fields[ i ][ w ] + '</li>'
+                }
+              }
+            }
+          }
+        }
+
+        $('#attrSelections > ul')
+          .empty()
+          .append(typeList)
+        $('#attrSelections > ul > li')
+          .unbind()
+          .click(function () {
+            $('#info-Type > .attribute')
+              .text($(this)
+                .text())
+            $('#attrSelections')
+              .css('left', ($('.infoEdit')
+                .width() + 20) + 'px')
+          })
+        $('#attrSelections')
+          .animate({
+            width: '160px'
+          }, 150)
+      })
+
+    $('#info-Status')
+      .on('click', function () {
+        $('#attrSelections')
+          .css('left', ($('.infoEdit')
+            .width() + 20) + 'px')
+        $('.editRow')
+          .css('background', '#252830')
+        $(this)
+          .css('background', '#3e4149')
+        var statusList = ''
+        for (var i = 0; i < gS.getFields('status')
+          .length; i++) {
+          statusList += '<li>' + gS.getFields('status')[ i ] + '</li>'
+        }
+        $('#attrSelections > ul')
+          .empty()
+          .append(statusList)
+        $('#attrSelections > ul > li')
+          .unbind()
+          .click(function () {
+            $('#info-Status > .attribute')
+              .text($(this)
+                .text())
+            $('#attrSelections')
+              .css('left', ($('.infoEdit')
+                .width() + 20) + 'px')
+          })
+        $('#attrSelections')
+          .animate({
+            width: '160px'
+          }, 150)
+      })
+    $('#info-Navn')
+      .on('click', function () {
+        $('.editRow')
+          .css('background', '#252830')
+        $(this)
+          .css('background', '#3e4149')
+        $('#attrSelections > ul')
+          .empty()
+        $('#attrSelections')
+          .animate({
+            width: '0'
+          }, 100)
+      })
+  },
+  // Creates the HTML for the table
+  infoPanel: function (obj, edit) {
+    $('#editGeom, #deleteGeom, #copyGeom')
+      .off('click')
+      .remove()
+    var table = "<div id='objTable'>" + "<table class='table'>"
+
+    var addRow = function (key, attribute) {
+      return "<tr class='table-row'>" +
+        "<td class='rowName'>" + key + '</td>' +
+        '<td>' + attribute + '</td>' + '</tr>'
+    }
+
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        if (key !== 'CG_ID' &&
+          key !== 'ProjektID' &&
+          key.indexOf('label') === -1 &&
+          key.indexOf('Label') === -1 &&
+          obj[ key ] !== 'null' &&
+          obj[ key ] !== null) {
+          if (key === 'P_pladser' && (obj[ key ] === null || obj[ key ] === 'null')) {
+            // how do I reverse this?
+          } else {
+            table += addRow(key, obj[ key ])
+          }
+        }
+      }
+    }
+
+    if (edit === false) {
+      table +=
+        '</table>' + "<div id='popup-button-wrap'>" +
+        "<div id='copyGeom' class='disabled-edit unselectable-text'><p>Kopier<i class='fa fa-copy table-edit' aria-hidden='true'></i></p></div>" +
+        '</div>'
+    } else {
+      table +=
+        '</table>' + "<div id='popup-button-wrap'>" +
+        "<div id='editGeom' class='disabled-edit unselectable-text'><p>Rediger<i class='fa fa-pencil table-edit' aria-hidden='true'></i></p></div>" +
+        "<div id='deleteGeom' class='disabled-edit unselectable-text'><p>Slet<i class='fa fa-trash table-delete' aria-hidden='true'></i></p></div>" +
+        '</div>'
+    }
+
+    return table
   },
   // updates the legend
   updateLegend: function () {
@@ -302,7 +491,7 @@ var gF = { // eslint-disable-line
               .addTo(map)
 
             if (editable === true) {
-              editPanel(json)
+              gF.editPanel(json)
             }
 
             gF.updateLegend()
@@ -441,7 +630,7 @@ var gF = { // eslint-disable-line
         closeButton: false
       })
           .setLatLng(layer.getCenter())
-          .setContent(infoPanel(feature.properties, editable))
+          .setContent(gF.infoPanel(feature.properties, editable))
           .openOn(map)
 
         /*******************************************************************************
@@ -487,7 +676,7 @@ var gF = { // eslint-disable-line
                 map.closePopup()
 
                 // open the editPanel (Edit attributes)
-                editPanel(feature)
+                gF.editPanel(feature)
 
                 // if we are ending the editing session
               } else {
