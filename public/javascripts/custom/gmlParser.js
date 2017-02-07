@@ -1,5 +1,6 @@
 /*
  * This scripts takes a gml from a wfs call and exports geoJSON
+ * Currently can't handle holes in the geometry
  * Author: NIRAS - Casper Fibæk
  */
 
