@@ -137,7 +137,6 @@ function init () { // eslint-disable-line
           if (e.layer.feature.properties) {
             if (map._custom.legendLayers.indexOf(e.layer.feature.properties.Type) === -1) {
               gF.updateLegend()
-              console.log('added: ' + e.layer.feature.properties.Type)
             }
           }
         }

@@ -1,12 +1,12 @@
- /* global getFields lookUp */
+ /* global gS */
 
 function editPanel( feature ) { // eslint-disable-line
   var fields = []
-  fields.push(getFields('byggeri'))
-  fields.push(getFields('byggeplads'))
-  fields.push(getFields('adgangsvej'))
-  fields.push(getFields('parkering'))
-  map._custom.addFields = getFields('all')
+  fields.push(gS.getFields('byggeri'))
+  fields.push(gS.getFields('byggeplads'))
+  fields.push(gS.getFields('parkering'))
+  fields.push(gS.getFields('adgangsvej'))
+  map._custom.addFields = gS.getFields('all')
 
   $('#interface')
     .prepend(
@@ -55,7 +55,7 @@ function editPanel( feature ) { // eslint-disable-line
       var _thisType = $('#info-Type > .attribute')
         .text()
       if (map._custom.addFields.indexOf(_thisType) === -1) {
-        _thisType = lookUp(_thisType)
+        _thisType = gS.lookUp(_thisType)
       }
       var typeList = ''
 
@@ -109,9 +109,9 @@ function editPanel( feature ) { // eslint-disable-line
       $(this)
         .css('background', '#3e4149')
       var statusList = ''
-      for (var i = 0; i < getFields('status')
+      for (var i = 0; i < gS.getFields('status')
         .length; i++) {
-        statusList += '<li>' + getFields('status')[ i ] + '</li>'
+        statusList += '<li>' + gS.getFields('status')[ i ] + '</li>'
       }
       $('#attrSelections > ul')
         .empty()
