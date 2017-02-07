@@ -1,5 +1,17 @@
+ /* global
+    addWfsLayer
+    addWMSlayer
+    QueryString
+    add2LayerList
+    lookUp eventJSON
+    updateLegend
+    dtu_bygninger
+    loadInterface
+    dbJSON
+*/
+
 // Initialize the interface
-function init () {
+function init () { // eslint-disable-line
   // Query the URL for parameters
   var query = QueryString()
 
@@ -23,14 +35,8 @@ function init () {
       editable: true // enables leaflet.editable
     })
 
-    map._legendLayers = []
-    map._attrEdit = {
-      top: 300,
-      left: 300
-    }
-
     // GST Ortho 2016
-    var GST_Ortho = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=orto_foraar', {
+    var aerialImagery = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=orto_foraar', {
       login: 'qgisdk',
       password: 'qgisdk',
       version: '1.1.1',
@@ -44,7 +50,7 @@ function init () {
       .addTo(map)
 
     // GST skaermkort 2016
-    var GST_Skaerm = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=topo_skaermkort', {
+    var staticBasemap = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=topo_skaermkort', {
       login: 'qgisdk',
       password: 'qgisdk',
       version: '1.1.1',
@@ -66,8 +72,8 @@ function init () {
 
     // Add to layer control
     var basemaps = {
-      'Luftfoto': GST_Ortho,
-      'Skærmkort': GST_Skaerm,
+      'Luftfoto': aerialImagery,
+      'Skærmkort': staticBasemap,
       'Open Street Maps': OSMbasemap
     }
 
@@ -75,18 +81,18 @@ function init () {
       // ...
     }
 
-    var mainControl = L.control.layers(basemaps, overlayMaps, {
-      collapsed: false
-    })
-      .addTo(map)
+    map._custom = {
+      'editing': null,
+      'layerControl': L.control.layers(basemaps, overlayMaps, {collapsed: false})
+        .addTo(map),
+      'legendLayers': []
+    }
 
     /*******************************************************************************
         Snapping functionality
     *******************************************************************************/
     // initialize the snapHandler as a global
-    snap = new L.Handler.MarkerSnap(map)
-    // map global that specifies what layer is currently being edited
-    map._editing = null
+    var snap = new L.Handler.MarkerSnap(map)
 
     var snapMarker = L.marker(map.getCenter(), {
       icon: map.editTools.createVertexIcon({
@@ -95,14 +101,12 @@ function init () {
       opacity: 1,
       zIndexOffset: 1000
     })
-
-    snapMarker
-      .on('snap', function (e) {
-        snapMarker.addTo(map)
-      })
-      .on('unsnap', function (e) {
-        snapMarker.remove()
-      })
+    .on('snap', function (e) {
+      snapMarker.addTo(map)
+    })
+    .on('unsnap', function (e) {
+      snapMarker.remove()
+    })
 
     var followMouse = function (e) {
       snapMarker.setLatLng(e.latlng)
@@ -135,7 +139,7 @@ function init () {
 
         if (e.layer.feature) {
           if (e.layer.feature.properties) {
-            if (map._legendLayers.indexOf(e.layer.feature.properties.Type) === -1) {
+            if (map._custom.legendLayers.indexOf(e.layer.feature.properties.Type) === -1) {
               updateLegend()
               console.log('added: ' + e.layer.feature.properties.Type)
             }
@@ -147,11 +151,11 @@ function init () {
         snapMarker.remove()
       })
       .on('editable:enable', function (e) {
-        map._editing = e.layer._leaflet_id
+        map._custom.editing = e.layer._leaflet_id
         map.off('layeradd')
       })
       .on('editable:disable', function (e) {
-        map._editing = null
+        map._custom.editing = null
         map.on('layeradd', function (e) {
           snap.addGuide(e.layer)
         })
@@ -213,8 +217,7 @@ function init () {
         }
 
         // add the layer with a standard style
-        // function is from eventLayers.js
-        var addLayer = eventJSON(data[ i ], true)
+        eventJSON(data[ i ], true)
           .addTo(map)
           .bringToFront()
       }
@@ -288,8 +291,6 @@ function init () {
       IF not valid ID is shown, don't load interface and display error message.
     *******************************************************************************/
   } else {
-    jQuery('body')
-      .empty()
-      .html('<p> Invalid URL parameters </p>')
+    $('body').empty().html('<p> Invalid URL parameters </p>')
   }
 }
