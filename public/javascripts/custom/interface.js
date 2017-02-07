@@ -1,7 +1,7 @@
-function interface() {
+function loadInterface() {
 
   /*******************************************************************************
-    Functionality of open and hide button left of interface.
+    Functionality of open and hide button left of loadInterface.
   *******************************************************************************/
   $( "#openHide" )
     .click( function () {
