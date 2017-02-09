@@ -1,5 +1,7 @@
 /* global proj4 */
-'use strict'
+
+// This script is a conversion of perliedmans node reproject library
+// https://github.com/perliedman
 
 var repFunc = {
   // Checks if `list` looks like a `[x, y]`.
