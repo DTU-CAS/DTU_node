@@ -1,5 +1,6 @@
   // Connecting and interactiving with the database
   // Author: Casper Fibaek - NIRAS
+  /* global $ L map */
 
   var dB = ({ // eslint-disable-line
 

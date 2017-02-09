@@ -1,6 +1,9 @@
 /* global
   gS
   dB
+  $
+  map
+  L
   Wkt
   chroma
   OpenLayers

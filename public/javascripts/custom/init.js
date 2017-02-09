@@ -1,8 +1,10 @@
  /* global
  gS
  gF
+ $
+ L
+ map
 */
-
 function init () { // eslint-disable-line
   // Query the URL for parameters
   var query = gF.queryString()
@@ -17,7 +19,7 @@ function init () { // eslint-disable-line
       BASIC LEAFLET OPTIONS
     *******************************************************************************/
     // create the map
-    map = L.map('map', {
+    map = L.map('map', { // eslint-disable-line
       center: [ 55.787016, 12.522536 ],
       zoom: 16,
       maxZoom: 21,

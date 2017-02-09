@@ -237,6 +237,10 @@ router.post('/api/post/', function (req, res) {
 
       msSQL.connection.close()
     })
+    .catch(function (err) {
+      console.log(err)
+      return res.status(500)
+    })
 })
 
 // UPDATE
