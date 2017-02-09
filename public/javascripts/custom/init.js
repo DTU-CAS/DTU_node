@@ -216,9 +216,8 @@ function init () { // eslint-disable-line
           .bringToFront()
       }
     })
-    .fail(function (jqXHR, status, error) {
-      console.log('AJAX call failed: ', jqXHR)
-      console.log('Error message: ', error)
+    .fail(function (error) {
+      console.log('AJAX call failed: ', error)
     })
 
     // WFS layers: layername, displayname, style, editable

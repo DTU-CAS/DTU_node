@@ -53,9 +53,8 @@
             }
           }
         })
-        .fail(function (jqXHR, status, error) {
-          console.log('AJAX call failed: ', jqXHR)
-          console.log('Error message: ', error)
+        .fail(function (error) {
+          console.log('AJAX call failed: ', error)
         })
     },
     /*
