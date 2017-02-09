@@ -1,14 +1,10 @@
 /* global
-  gS
-  dB
+  gS dB
   $
-  map
-  L
+  map L
   Wkt
   chroma
-  OpenLayers
-  proj4
-  reproject
+  OpenLayers proj4 reproject
 */
 
 var gF = { // eslint-disable-line

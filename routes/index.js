@@ -84,6 +84,15 @@ router.get('/api/get/:ID', function (req, res) {
 
       msSQL.connection.close()
     })
+    .catch(function (err) {
+      console.log(err)
+      console.log('bobobobobobob')
+      return res.status(500).json({
+        'success': false,
+        'message': err,
+        'status': 500
+      })
+    })
 })
 
 // DELETE
@@ -144,6 +153,10 @@ router.get('/api/delete/:projectID/:cgID', function (req, res) {
         })
 
       msSQL.connection.close()
+    })
+    .catch(function (err) {
+      console.log(err)
+      return res.status(500)
     })
 })
 

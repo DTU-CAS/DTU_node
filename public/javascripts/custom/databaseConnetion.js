@@ -54,7 +54,8 @@
           }
         })
         .fail(function (jqXHR, status, error) {
-          console.log('AJAX call failed: ' + status + ', ' + error)
+          console.log('AJAX call failed: ', jqXHR)
+          console.log('Error message: ', error)
         })
     },
     /*
@@ -143,14 +144,14 @@
             console.log(res)
           })
           .fail(function (jqXHR, status, error) {
-            console.log('AJAX call failed: ', jqXHR)
+            console.log('AJAX call failed: ' + status + ', ' + error)
           })
       }
 
       updateDB(postObj)
     },
 
-    // WRITE TO DATABASE ({ProjektID: "casper skrev det her"})
+    // WRITE TO DATABASE ({ProjektID: "bob wrote this"})
     write: function (obj) {
       var keys = ''
       var values = ''
