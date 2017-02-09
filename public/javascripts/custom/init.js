@@ -3,7 +3,6 @@
  gF
 */
 
-// Initialize the interface
 function init () { // eslint-disable-line
   // Query the URL for parameters
   var query = gF.queryString()
