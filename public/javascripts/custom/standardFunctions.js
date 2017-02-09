@@ -3,8 +3,13 @@
   dB
   Wkt
   chroma
-  GML2GeoJSON
+  OpenLayers
+  alert
+  proj4
+  reproject
+  XMLSerializer
 */
+
 var gF = { // eslint-disable-line
   // This algorithm is from user: Quentin on GitHUB
   // Queries the URL parameters and returns as JSON
@@ -578,14 +583,9 @@ var gF = { // eslint-disable-line
 
     $.ajax({
       url: wfsRequest,
-      success: function (result) {
-        // Parse the return GML file
-        // Function is from gmlParser.js
-        var geom = GML2GeoJSON(result, true)
-
-        // add the layer to the map
-        // function is from eventLayers.js
-        var layer = gF.eventJSON(geom, editable)
+      success: function (geom) {
+        var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
+        var layer = gF.eventJSON(jsonGeom, editable)
 
         // whether or not it should be possible to edit the layer
         if (editable === false) {
@@ -598,10 +598,53 @@ var gF = { // eslint-disable-line
           })
         }
 
-        // function is from layerFunctions.js
         gF.add2LayerList(name, layer)
       }
     })
+  },
+  GMLtoGEOJSON: function (geom, type) { // eslint-disable-line
+    try {
+      var options = OpenLayers.Util.extend(
+        OpenLayers.Util.extend({}, {extractAttributes: true})
+      )
+
+      var vectors = new OpenLayers.Layer.Vector('Vector Layer')
+
+      var readerGeo
+      switch (type) {
+        case 'gml': {
+          readerGeo = new OpenLayers.Format.GML(options)
+          break
+        }
+        case 'gml-2': {
+          readerGeo = new OpenLayers.Format.GML.v2(options) // eslint-disable-line
+          break
+        }
+        case 'gml-3': {
+          readerGeo = new OpenLayers.Format.GML.v3(options) // eslint-disable-line
+          break
+        }
+        default: break
+      }
+
+      var oSerializer = new XMLSerializer()
+      var sXML = oSerializer.serializeToString(geom)
+
+      // OBS var xmlText = geomtoString //
+      var geoVector = readerGeo.read(sXML)
+
+      vectors.addFeatures(geoVector)
+
+      var UTM32 = proj4('+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs')
+
+      var readerJson = new OpenLayers.Format.GeoJSON()
+      var jsonString = readerJson.write(geoVector)
+      var json = JSON.parse(jsonString)
+
+      return reproject.toWgs84(json, UTM32, '')
+    } catch (e) {
+      alert(e)
+    }
   },
   // Takes a normal geoJSON and adds custom events
   eventJSON: function (geoJSON, editable) {

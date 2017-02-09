@@ -1,7 +1,6 @@
  /* global
  gS
  gF
- dtu_bygninger
 */
 
 // Initialize the interface
@@ -224,59 +223,77 @@ function init () { // eslint-disable-line
     gF.addWfsLayer('ugis:T6831', 'Adgangsveje', false)
     gF.addWfsLayer('ugis:T6833', 'Ombyg og Renovering', false)
     gF.addWfsLayer('ugis:T7418', 'Nybyggeri', false)
-    gF.addWMSlayer('18454', 'Streetfood')
+    gF.addWfsLayer('18454', 'Streetfood')
 
     /*******************************************************************************
-        Add Buildings and lables (local file) TODO: get buildings from WFS
+        Add Buildings and lables
     *******************************************************************************/
     // Adds local dtu buildings layer
     var labels = L.layerGroup()
 
-    // function is from eventLayers.js
-    var stpByg = L.geoJSON(dtu_bygninger)
-    stpByg.eachLayer(function (layer) {
-      layer.feature.properties.Type = 'Bygninger'
-    })
+    var wfsBase = 'http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?'
+    var wfsParams = {
+      Site: 'Provider',
+      Page: 'DTU',
+      UserName: 'DTUedit',
+      Password: 'Rette37g',
+      Service: 'WFS',
+      Request: 'GetFeature',
+      Typename: 'T20047',
+      Srsname: 'EPSG:3857'
+    }
+    var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true)
 
-    var dtuByg = gF.eventJSON(stpByg.toGeoJSON(), false)
-    // Loop through buildings and create labels
-    dtuByg.eachLayer(function (layer) {
-      var properties = layer.feature.properties
-      var bygnr = properties.DTUbygnnr
-      var afsnit = properties.Afsnit
+    $.ajax({
+      url: wfsRequest,
+      success: function (geom) {
+        var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
+        var stpByg = L.geoJSON(jsonGeom)
+        stpByg.eachLayer(function (layer) {
+          layer.feature.properties.Type = 'Bygninger'
+        })
 
-      // Create string if building if afsnit is not empty
-      var postStr = 'Bygning ' + bygnr
-      if (afsnit !== null && afsnit !== 0) {
-        postStr += ', ' + afsnit
+        var dtuByg = gF.eventJSON(stpByg.toGeoJSON(), false)
+        // Loop through buildings and create labels
+        dtuByg.eachLayer(function (layer) {
+          var properties = layer.feature.properties
+          var bygnr = properties.DTUbygnnr
+          var afsnit = properties.Afsnit
+
+          // Create string if building if afsnit is not empty
+          var postStr = 'Bygning ' + bygnr
+          if (afsnit !== null && afsnit !== 0) {
+            postStr += ', ' + afsnit
+          }
+
+          // Create markers at the centroid of the building and attach toolTip
+          if (bygnr !== null) {
+            var marker = L.marker(
+                layer
+                .getBounds()
+                .getCenter(), {
+                  opacity: 0
+                }
+              )
+              .bindTooltip(postStr, {
+                permanent: true,
+                offset: [ 0, 25 ]
+              })
+              .openTooltip()
+
+            labels.addLayer(marker)
+          }
+        })
+
+        // add the layers to the custom layer list.
+        // function is from layerFunctions.js
+        gF.add2LayerList('Bygninger', dtuByg)
+        gF.add2LayerList('Bygninger - Labels', labels)
+
+        // LEGEND
+        gF.updateLegend()
       }
-
-      // Create markers at the centroid of the building and attach toolTip
-      if (bygnr !== null) {
-        var marker = L.marker(
-            layer
-            .getBounds()
-            .getCenter(), {
-              opacity: 0
-            }
-          )
-          .bindTooltip(postStr, {
-            permanent: true,
-            offset: [ 0, 25 ]
-          })
-          .openTooltip()
-
-        labels.addLayer(marker)
-      }
     })
-
-    // add the layers to the custom layer list.
-    // function is from layerFunctions.js
-    gF.add2LayerList('Bygninger', dtuByg)
-    gF.add2LayerList('Bygninger - Labels', labels)
-
-    // LEGEND
-    gF.updateLegend()
 
     // Start loading the interface functionality
     /*******************************************************************************
