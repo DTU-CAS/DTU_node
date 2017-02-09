@@ -4,20 +4,19 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  <link rel="icon" href="images/DTU32.ico">
   <title>{{{title}}}</title>
 
-  <link rel="icon" href="images/DTU32.ico">
-  <link rel="stylesheet" type="text/css" href="stylesheets/general.css">
-  <link rel="stylesheet" type="text/css" href="stylesheets/table.css">
-
-  <!-- Wicket -->
+  <!-- Wicket (Needed for GML parsing)-->
   <script src="javascripts/wicket.js"></script>
+
+  <!-- OpenLayers -->
+  <script src="javascripts/ol.js"></script>
+  <link rel="stylesheet" type="text/css" href="stylesheets/ol.css">
 
   <!-- temp geometry (DTU BYGNINGER)-->
   <script src="javascripts/custom/dtu_bygninger.js"></script>
 
-  <!-- leaflet -->
   <!-- leafletJS: Copyright (c) 2010-2016, Vladimir Agafonkin -->
   <script src="javascripts/leaflet.js"></script>
   <script src="javascripts/leaflet.GeometryUtil.js"></script>
@@ -27,25 +26,27 @@
   <script src="javascripts/leaflet.edgeBuffer.js"></script>
   <script src="javascripts/leaflet.fade.js"></script>
   <link rel="stylesheet" type="text/css" href="stylesheets/leaflet.css">
-  <link rel="stylesheet" type="text/css" href="stylesheets/leaflet-theme.css">
 
   <!-- jQuery -->
   <script src="javascripts/jquery-3.1.1.min.js"></script>
 
-  <!-- proj4 -->
+  <!-- Proj4 (Reprojections)-->
   <script src="javascripts/proj4-2.3.15.js"></script>
 
-  <!-- CHROMA -->
+  <!-- Chroma (Color functions)-->
   <script src="javascripts/chroma.js"></script>
 
-  <!-- custom -->
+  <!-- Custom -->
   <script src="javascripts/custom/databaseConnetion.js"></script>
   <script src="javascripts/custom/gmlParser.js"></script>
   <script src="javascripts/custom/standardStyles.js"></script>
   <script src="javascripts/custom/standardFunctions.js"></script>
   <script src="javascripts/custom/init.js"></script>
+  <link rel="stylesheet" type="text/css" href="stylesheets/leaflet-theme.css">
+  <link rel="stylesheet" type="text/css" href="stylesheets/general.css">
+  <link rel="stylesheet" type="text/css" href="stylesheets/table.css">
 
-  <!-- custom fonts -->
+  <!-- Fonts and Icons-->
   <link rel="stylesheet" type="text/css" href="stylesheets/font-awesome.min.css">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 

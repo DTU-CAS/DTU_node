@@ -1,14 +1,18 @@
+/* global proj4 */
 /*
- * This scripts takes a gml from a wfs call and exports geoJSON
- * Currently can't handle holes in the geometry
- * Author: NIRAS - Casper Fibæk
+ * This scripts takes a gml from a wfs call and exports geoJSON,
+ * Requires jQuery and Proj4js
+ * Move convert out into a reproject geojson script
+ *
+ * @author NIRAS - Casper Fibæk
+ * @version 0.2
+ * @param {object} gml - Raw '.GML' file, not a string.
+ * @param {boolean} convert - enable/disable conversion from UTM32 to WGS84
  */
-
- /* global proj4 */
 
 var GML2GeoJSON = function (gml, convert) { // eslint-disable-line
   var GML = {
-    geojson: {
+    'geojson': {
       'type': 'FeatureCollection',
       'crs': {
         'properties': {
@@ -18,8 +22,10 @@ var GML2GeoJSON = function (gml, convert) { // eslint-disable-line
       },
       'features': []
     },
-    WGS84Param: proj4('EPSG:4326'),
-    coordinateSystem: proj4('+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs'),
+
+    'WGS84Param': proj4('EPSG:4326'),
+    'coordinateSystem': proj4('+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs'),
+
     getCoord: function (coordArr, convert, srs, padding) {
       var ts = $(coordArr).attr('ts')
       var cs = $(coordArr).attr('cs')
