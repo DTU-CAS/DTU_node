@@ -4,10 +4,8 @@
   Wkt
   chroma
   OpenLayers
-  alert
   proj4
   reproject
-  XMLSerializer
 */
 
 var gF = { // eslint-disable-line
@@ -657,9 +655,6 @@ var gF = { // eslint-disable-line
     // creates the layer add style at end
     var eventLayer = L.geoJSON(geoJSON)
 
-    /*******************************************************************************
-        CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK CLICK
-    *******************************************************************************/
     .on('click', function (e) {
         // set up variables
       var layer = e.layer
