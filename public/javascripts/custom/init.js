@@ -439,14 +439,14 @@ function init () { // eslint-disable-line
       Add close button
     *******************************************************************************/
     $('#saveData').click(function () {
-      $('#saveData > p').text('Ændringer Gemt')
+      $('#saveData > p').text('Ændringer gemt')
       $('#saveData').css('background', '#10b47b')
       $('#saveData').hover(function () {
         $(this).css('background-color', '#17966a')
       })
       window.close()
       setTimeout(function () {
-        $('#saveData > p').text('Gem Ændringer og luk')
+        $('#saveData > p').text('Gem og luk kort')
         $('#saveData').css('background', '#1ca8dd')
         $('#saveData').hover(function () {
           $(this).css('background-color', '#1781a8')
