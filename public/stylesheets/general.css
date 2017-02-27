@@ -65,6 +65,33 @@ body > p{
   user-select: none;
 }
 
+#saveData{
+  display: block;
+  margin-top: 200px;
+  background: #1ca8dd;
+  transition: all .10s ease-in-out;
+  -moz-transition: all .10s ease-in-out;
+  -webkit-transition: all .10s;
+  max-width: 144px;
+  padding: 8px;
+  margin-left: 40px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  cursor: pointer;
+}
+
+#saveData:hover{
+  background: #1781a8;
+}
+
+#saveData > p {
+  transition: all .10s ease-in-out;
+  -moz-transition: all .10s ease-in-out;
+  -webkit-transition: all .10s;
+  white-space: pre-wrap;
+  pointer-events: none;
+}
+
 #input {
   z-index: 901;
   width: 250px;
@@ -128,7 +155,7 @@ body > p{
 }
 
 #editButtons>.title {
-  background: #10b47b;
+  background: #656565;
   margin: 0;
   margin-right: -4px;
   margin-bottom: -2px;
@@ -141,6 +168,12 @@ body > p{
   position: relative;
   z-index: 9001;
   display: block !important;
+}
+
+#editButtons > div,
+#snapping,
+#saveData{
+  border-radius: 2px;
 }
 
 .theme {
@@ -183,6 +216,7 @@ body > p{
   -moz-transition: all .1s ease-in-out;
   -webkit-transition: all .1s;
   border-bottom: 2px solid #1f2025;
+  border-radius: 2px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;

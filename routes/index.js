@@ -4,7 +4,7 @@ var router = express.Router()
 var msSQL = require('mssql')
 var wellKnown = require('wellknown') // Parses and writes WKT
 var repro = require('reproject')     // Reprojects geojson files
-var db = require('routes/db')
+var db = require('./db')
 var dbConnection = db.connection
 var dbTable = db.table
 

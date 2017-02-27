@@ -1,10 +1,4 @@
- /* global
- gS
- gF
- $
- L
- map
-*/
+ /* global gS gF $ L map */
 function init () { // eslint-disable-line
   // Query the URL for parameters
   var query = gF.queryString()
@@ -440,6 +434,25 @@ function init () { // eslint-disable-line
             .addClass('off')
         }
       })
+
+    /*******************************************************************************
+      Add close button
+    *******************************************************************************/
+    $('#saveData').click(function () {
+      $('#saveData > p').text('Ændringer Gemt')
+      $('#saveData').css('background', '#10b47b')
+      $('#saveData').hover(function () {
+        $(this).css('background-color', '#17966a')
+      })
+      window.close()
+      setTimeout(function () {
+        $('#saveData > p').text('Gem Ændringer og luk')
+        $('#saveData').css('background', '#1ca8dd')
+        $('#saveData').hover(function () {
+          $(this).css('background-color', '#1781a8')
+        })
+      }, 3000)
+    })
 
     /*******************************************************************************
       IF not valid ID is shown, don't load interface and display error message.
