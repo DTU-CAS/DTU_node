@@ -1,11 +1,13 @@
+/* eslint-disable camelcase */
+/* eslint-disable new-cap */
 var express = require('express')
 var router = express.Router()
 
-var msSQL = require('mssql')
+var sql = require('mssql')
 var wellKnown = require('wellknown') // Parses and writes WKT
 var repro = require('reproject')     // Reprojects geojson files
 var db = require('./db')
-var dbConnection = db.connection
+var dbString = db.connection
 var dbTable = db.table
 
 var projections = {
@@ -24,11 +26,14 @@ router.get('/', function (req, res, next) {
 router.get('/api/get/:ID', function (req, res) {
   // Grab data from the URL parameters
   var id = req.params.ID
+  var name = req.params.name
 
-  msSQL.connect(dbConnection)
+  console.log(`Connection made with ID: ${id} and NAME: ${name}`)
+
+  sql.connect(dbString)
     .then(function () {
       var DBquery = 'SELECT ' +
-        'cgID as cgID, ' +
+        'CG_ID as CG_ID, ' +
         'CG_GEOMETRY.ToString() as CG_GEOMETRY, ' +
         'Type as Type, ' +
         'Navn as Navn, ' +
@@ -44,7 +49,7 @@ router.get('/api/get/:ID', function (req, res) {
         'Status as Status ' +
         'FROM ' + dbTable + " WHERE ProjektID = '" + id + "'"
 
-      new msSQL.Request()
+      new sql.Request()
         .query(DBquery)
         .then(function (result) {
           // loop through geometries
@@ -52,7 +57,7 @@ router.get('/api/get/:ID', function (req, res) {
             result[ i ] = {
               'type': 'Feature',
               'properties': {
-                'cgID': result[ i ].cgID,
+                'CG_ID': result[ i ].CG_ID,
                 'Type': result[ i ].Type,
                 'Navn': result[ i ].Navn,
                 'Projektleder': result[ i ].Projektleder,
@@ -69,12 +74,10 @@ router.get('/api/get/:ID', function (req, res) {
               'geometry': repro.reproject(wellKnown.parse(result[ i ].CG_GEOMETRY), 'EPSG:25832', 'EPSG:4326', projections)
             }
           }
-          msSQL.connection.close()
           return res.json(result)
         })
         .catch(function (err) {
           console.log(err)
-          msSQL.connection.close()
           return res.status(500)
             .json({
               success: false,
@@ -85,7 +88,6 @@ router.get('/api/get/:ID', function (req, res) {
     })
     .catch(function (err) {
       console.log(err)
-      msSQL.connection.close()
       return res.status(500).json({
         'success': false,
         'message': err,
@@ -95,54 +97,52 @@ router.get('/api/get/:ID', function (req, res) {
 })
 
 // DELETE
-router.get('/api/delete/:projectID/:cgID', function (req, res) {
+router.get('/api/delete/:projectID/:cg_id', function (req, res) {
   // Grab data from the URL parameters
   var projectID = req.params.projectID
-  var cgID = req.params.cgID
+  var cg_id = req.params.cg_id
   var DBquery
 
-  msSQL.connect(dbConnection)
+  sql.connect(dbString)
     .then(function () {
-      if (projectID === 'NULL' && cgID === 'ALL') {
+      if (projectID === 'NULL' && cg_id === 'ALL') {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
           '(ProjektID IS NULL)'
       } else if (projectID === 'ALL') {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
-          'cgID = ' + cgID
-      } else if (cgID === 'ALL') {
+          'CG_ID = ' + cg_id
+      } else if (cg_id === 'ALL') {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
           'ProjektID = ' + "'" + projectID + "'"
       } else if (projectID === 'NULL') {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
-          '(ProjektID IS NULL AND cgID = ' + cgID + ')'
-      } else if (cgID === 'NULL') {
+          '(ProjektID IS NULL AND CG_ID = ' + cg_id + ')'
+      } else if (cg_id === 'NULL') {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
-          '(cgID IS NULL AND projectID = ' + projectID + ')'
+          '(CG_ID IS NULL AND projectID = ' + projectID + ')'
       } else {
         DBquery = 'DELETE FROM ' +
           dbTable + ' WHERE ' +
-          'cgID = ' + "'" + cgID + "'" + ' AND ' +
+          'CG_ID = ' + "'" + cg_id + "'" + ' AND ' +
           'ProjektID = ' + "'" + projectID + "'"
       }
 
-      new msSQL.Request()
+      new sql.Request()
         .query(DBquery)
         .then(function (result) {
-          console.log('deleted: ' + cgID)
-          msSQL.connection.close()
+          console.log(`Deleted site with ID: ${cg_id}`)
           return res.status(200)
             .json({
-              'deleted': cgID
+              'deleted': cg_id
             })
         })
         .catch(function (err) {
           console.log(err)
-          msSQL.connection.close()
           return res.status(500)
             .json({
               success: false,
@@ -153,33 +153,23 @@ router.get('/api/delete/:projectID/:cgID', function (req, res) {
     })
     .catch(function (err) {
       console.log(err)
-      msSQL.connection.close()
       return res.status(500)
     })
 })
 
-// test functionality
-router.get('/api/test/', function (req, res) {
-  return res.status(200)
-    .json({
-      working: true
-    })
-})
-
 router.get('/api/latest/', function (req, res) {
-  msSQL.connect(dbConnection)
+  sql.connect(dbString)
     .then(function () {
-      var topQuery = `SELECT TOP 1 cgID FROM ${dbTable} ORDER BY cgID DESC;`
+      var topQuery = `SELECT TOP 1 CG_ID FROM ${dbTable} ORDER BY CG_ID DESC;`
 
-      new msSQL.Request()
+      new sql.Request()
         .query(topQuery)
         .then(function (result) {
-          msSQL.connection.close()
-          return res.json(result[ 0 ].cgID)
+          console.log(`Selected Newly added geometry with ID: ${result[0].CG_ID}`)
+          return res.json(result[0].CG_ID)
         })
         .catch(function (err) {
           console.log(err)
-          msSQL.connection.close()
           return res.status(500)
             .json({
               success: false,
@@ -203,22 +193,21 @@ router.post('/api/post/', function (req, res) {
   }
 
   // connect to database
-  msSQL.connect(dbConnection)
+  sql.connect(dbString)
     .then(function () {
       DBquery = `INSERT INTO ${dbTable} (${data.keys}) VALUES (${data.values})`
       if (data.geometry) {
-        DBquery = `INSERT INTO ${dbTable} (${data.keys}, CG_GEOMETRY) VALUES (${data.values}, ${reproject})`
+        DBquery = `INSERT INTO ${dbTable} (${data.keys}, CG_GEOMETRY) VALUES (${data.values}, '${reproject}')`
       }
 
-      new msSQL.Request()
+      new sql.Request()
         .query(DBquery)
         .then(function (result) {
-          new msSQL.Request()
+          new sql.Request()
             .query(`UPDATE ${dbTable} SET CG_GEOMETRY.STSrid = 25832 WHERE CG_GEOMETRY.STSrid = 0`)
             .then(function () {
               console.log('Updated SRID')
-              msSQL.connection.close()
-
+              console.log(`Created new site!`)
               return res.status(200)
                 .json({
                   'created': result
@@ -226,12 +215,10 @@ router.post('/api/post/', function (req, res) {
             })
             .catch(function (err) {
               console.log(err)
-              msSQL.connection.close()
             })
         })
         .catch(function (err) {
           console.log(err)
-          msSQL.connection.close()
           return res.status(500)
             .json({
               success: false,
@@ -242,7 +229,6 @@ router.post('/api/post/', function (req, res) {
     })
     .catch(function (err) {
       console.log(err)
-      msSQL.connection.close()
       return res.status(500)
     })
 })
@@ -261,45 +247,43 @@ router.post('/api/update/', function (req, res) {
   var DBquery =
     'UPDATE ' + dbTable +
     ' ' + data.request +
-    ' WHERE cgID = ' + data.cgID
+    ' WHERE CG_ID = ' + data.CG_ID
 
   if (data.geometry && data.request.length > 4) {
     DBquery =
       'UPDATE ' + dbTable +
       ' ' + data.request +
       ", CG_GEOMETRY = '" + reproject + "'" +
-      ' WHERE cgID = ' + data.cgID
+      ' WHERE CG_ID = ' + data.CG_ID
   } else if (data.geometry) {
     DBquery =
       'UPDATE ' + dbTable +
       " SET CG_GEOMETRY = '" + reproject + "'" +
-      ' WHERE cgID = ' + data.cgID
+      ' WHERE CG_ID = ' + data.CG_ID
   }
 
   // connect to database
-  msSQL.connect(dbConnection)
+  sql.connect(dbString)
     .then(function () {
-      new msSQL.Request()
+      new sql.Request()
         .query(DBquery)
         .then(function (result) {
-          new msSQL.Request()
+          new sql.Request()
             .query(`UPDATE ${dbTable} SET CG_GEOMETRY.STSrid = 25832 WHERE CG_GEOMETRY.STSrid = 0`)
             .then(function (result) {
+              console.log(`Updated site with ID: ${data.CG_ID}`)
               console.log('Updated SRID')
-              msSQL.connection.close()
               return res.status(200)
                 .json({
-                  'updated': data.cgID
+                  'updated': data.CG_ID
                 })
             })
             .catch(function (err) {
               console.log(err)
-              msSQL.connection.close()
             })
         })
         .catch(function (err) {
           console.log(err)
-          msSQL.connection.close()
           return res.status(500)
             .json({
               success: false,

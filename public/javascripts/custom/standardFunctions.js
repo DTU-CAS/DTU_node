@@ -84,8 +84,8 @@ var gF = { // eslint-disable-line
           $('.infoEdit').css('cursor', 'default')
         }
       })
-      .css('left', map._attrEdit.left)
-      .css('top', map._attrEdit.top)
+      .css('left', map._custom.left)
+      .css('top', map._custom.top)
 
     for (var key in feature.properties) {
       if (feature.properties.hasOwnProperty(key)) {

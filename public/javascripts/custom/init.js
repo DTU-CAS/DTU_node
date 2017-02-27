@@ -438,7 +438,7 @@ function init () { // eslint-disable-line
     /*******************************************************************************
       Add close button
     *******************************************************************************/
-    $('#saveData').click(function () {
+    $('#saveData').on('click', function () {
       $('#saveData > p').text('Ændringer gemt')
       $('#saveData').css('background', '#10b47b')
       $('#saveData').hover(function () {
@@ -451,7 +451,7 @@ function init () { // eslint-disable-line
         $('#saveData').hover(function () {
           $(this).css('background-color', '#1781a8')
         })
-      }, 3000)
+      }, 1000)
     })
 
     /*******************************************************************************

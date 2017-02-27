@@ -14,9 +14,9 @@
     "morgan": "^1.7.0",
     "mssql": "^3.3.0",
     "pg": "^6.1.0",
-    "proj4": "*",
-    "reproject": "*",
+    "proj4": "^2.3.17",
+    "reproject": "^1.1.1",
     "serve-favicon": "^2.3.0",
-    "WellKnown": "^0.5.0"
+    "wellknown": "^0.5.0"
   }
 }
