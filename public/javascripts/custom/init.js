@@ -2,12 +2,29 @@
 function init () { // eslint-disable-line
   // Query the URL for parameters
   var query = gF.queryString()
+  console.log(query)
 
+  $.ajax({
+    type: 'GET',
+    url: '/api/verify/' + query.ID,
+    dataType: 'json'
+  })
+  .done(function (res) {
+    if (res.status === 'success') {
+      verified(res.name)
+    } else {
+      unverifed()
+    }
+  })
+  .fail(function (jqXHR, status, error) {
+    console.log('AJAX call failed: ' + status + ', ' + error)
+    unverifed()
+  })
+  if (query.ID && query.NAME) {}
   // Check if the ID is correct and if the request has a NAME paramter.
-  if (query.ID && query.NAME) {
+  var verified = function (name) {
     // Sets the headline equal to the passed URL NAME paramter
-    $('#bygID > p')
-      .text(query.NAME)
+    $('#bygID > p').text(name)
 
     /*******************************************************************************
       BASIC LEAFLET OPTIONS
@@ -457,7 +474,8 @@ function init () { // eslint-disable-line
     /*******************************************************************************
       IF not valid ID is shown, don't load interface and display error message.
     *******************************************************************************/
-  } else {
+  }
+  var unverifed = function () {
     $('body').empty().html('<h1> Invalid URL parameters </h1>')
   }
 }

@@ -17,6 +17,8 @@
     "proj4": "^2.3.17",
     "reproject": "^1.1.1",
     "serve-favicon": "^2.3.0",
-    "wellknown": "^0.5.0"
+    "soap": "^0.18.0",
+    "wellknown": "^0.5.0",
+    "xml2js": "^0.4.17"
   }
 }

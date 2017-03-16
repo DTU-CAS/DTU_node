@@ -2,6 +2,8 @@
 /* eslint-disable new-cap */
 var express = require('express')
 var router = express.Router()
+var soap = require('soap')
+var xmlParser = require('xml2js').parseString
 
 var sql = require('mssql')
 var wellKnown = require('wellknown') // Parses and writes WKT
@@ -9,6 +11,9 @@ var repro = require('reproject')     // Reprojects geojson files
 var db = require('./db')
 var dbString = db.connection
 var dbTable = db.table
+var soapURL = db.webServiceURL
+var soapUsername = db.username
+var soapPassword = db.password
 
 var projections = {
   'EPSG:4326': '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs', // WGS84
@@ -19,6 +24,42 @@ var projections = {
 router.get('/', function (req, res, next) {
   res.render('index', {
     title: 'DTU-Byggesager'
+  })
+})
+
+router.get('/api/verify/:ID', function (req, res) {
+  var UID = req.params.ID
+  console.log('recived: ' + UID)
+  var sql = `SELECT TOP 1 Tasks.[ProjectUID], [ProjectName]
+             FROM [PSP06_ProjectWebApp_CAS_PPM_DTU_Content_DB].[dbo].[MSP_EpmTask_UserView] AS Tasks
+             INNER JOIN [PSP06_ProjectWebApp_CAS_PPM_DTU_Content_DB].[dbo].[MSP_EpmProject_UserView] AS Projects ON Tasks.ProjectUID=Projects.ProjectUID
+             WHERE Tasks.ProjectUID='${UID}'
+             ORDER BY ProjectName
+             FOR XML AUTO`
+  var args = {'username': soapUsername, 'password': soapPassword, 'sql': sql}
+
+  soap.createClient(soapURL, function (err, client) {
+    if (err) console.log('could not connect to SOAP service')
+    client.executeSql(args, function (err, result) {
+      if (err) { res.status(200).json({'status': 'error', 'message': 'Did not find UID'}) } else {
+        var reply = result.executeSqlResult
+
+        console.log('Found UID!')
+
+        xmlParser(reply, function (err, result) {
+          if (err) { console.log('error parsing XML') }
+          var projectName = result.Tasks.Projects[0].$.ProjectName
+          var projectUID = result.Tasks.$.ProjectUID
+          console.dir('Name: ' + projectName)
+          console.dir('UID: ' + projectUID)
+          res.status(200).json({
+            'name': projectName,
+            'UID': projectUID,
+            'status': 'success'
+          })
+        })
+      }
+    })
   })
 })
 
