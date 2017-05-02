@@ -233,11 +233,11 @@ function init () { // eslint-disable-line
 
     // WFS layers: layername, displayname, style, editable
     // functions are from layerFunctions.js
-    gF.addWfsLayer('ugis:T6832', 'Byggepladser', false)
-    gF.addWfsLayer('ugis:T6834', 'Parkering', false)
-    gF.addWfsLayer('ugis:T6831', 'Adgangsveje', false)
-    gF.addWfsLayer('ugis:T6833', 'Ombyg og Renovering', false)
-    gF.addWfsLayer('ugis:T7418', 'Nybyggeri', false)
+    gF.addWfsLayer('6832', 'Byggepladser', false)
+    gF.addWfsLayer('6834', 'Parkering', false)
+    gF.addWfsLayer('6831', 'Adgangsveje', false)
+    gF.addWfsLayer('6833', 'Ombyg og Renovering', false)
+    gF.addWfsLayer('7418', 'Nybyggeri', false)
     gF.addWfsLayer('18454', 'Streetfood')
 
     /*******************************************************************************

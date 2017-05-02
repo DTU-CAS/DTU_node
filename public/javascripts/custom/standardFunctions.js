@@ -569,19 +569,21 @@ var gF = { // eslint-disable-line
     var wfsParams = {
       Site: 'Provider',
       Page: 'DTU',
-      UserName: 'DTUedit',
-      Password: 'Rette37g',
+      UserName: 'DTUview',
+      Password: 'Bruger12',
+      LoginType: 'KortInfo',
       Service: 'WFS',
       Request: 'GetFeature',
-      Typename: string,
-      Srsname: 'EPSG:3857'
+      layer: string,
+      Srsname: 'EPSG:4326'
     }
     var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true)
 
     $.ajax({
       url: wfsRequest,
       success: function (geom) {
-        var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
+        // var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
+        var jsonGeom = JSON.parse(geom)
         var layer = gF.eventJSON(jsonGeom, editable)
 
         // whether or not it should be possible to edit the layer
