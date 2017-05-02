@@ -4,7 +4,6 @@
   map L
   Wkt
   chroma
-  OpenLayers proj4 reproject
 */
 
 var gF = { // eslint-disable-line
@@ -223,6 +222,7 @@ var gF = { // eslint-disable-line
           key !== 'ProjektID' &&
           key.indexOf('label') === -1 &&
           key.indexOf('Label') === -1 &&
+          key.indexOf('KortInfo') === -1 &&
           obj[ key ] !== 'null' &&
           obj[ key ] !== null) {
           if (key === 'P_pladser' && (obj[ key ] === null || obj[ key ] === 'null')) {
@@ -259,7 +259,7 @@ var gF = { // eslint-disable-line
 
     map.eachLayer(function (layer) {
       if (layer instanceof L.Path) {
-        if (layer.options && layer.feature.properties) {
+        if (layer.options && layer.feature) {
           if (map._legendLayers.indexOf(layer.feature.properties.Type) === -1) {
             map._legendLayers.push(layer.feature.properties.Type)
 
@@ -565,28 +565,35 @@ var gF = { // eslint-disable-line
   },
   // Add WFS layer
   addWfsLayer: function (string, name, editable) {
-    var wfsBase = 'http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?'
+    // Site=Provider&Page=DTU&UserName=DTUview&Password=Bruger12&LoginType=KortInfo&layer=6833&srs=EPSG:4326&output=geojson
+    var wfsBase = 'http://services.nirasmap.niras.dk/kortinfo/services/Feature.ashx?'
     var wfsParams = {
       Site: 'Provider',
       Page: 'DTU',
       UserName: 'DTUview',
       Password: 'Bruger12',
       LoginType: 'KortInfo',
-      Service: 'WFS',
-      Request: 'GetFeature',
       layer: string,
-      Srsname: 'EPSG:4326'
+      srs: 'EPSG:4326',
+      output: 'geojson'
     }
     var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true)
 
     $.ajax({
       url: wfsRequest,
       success: function (geom) {
-        // var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
-        var jsonGeom = JSON.parse(geom)
-        var layer = gF.eventJSON(jsonGeom, editable)
+        var jsonGeom = geom
+
+        // Remove the geometry collections and turn to polygons
+        for (var i = 0; i < jsonGeom.features.length; i += 1) {
+          var feature = jsonGeom.features[i]
+          if (feature.geometry.type === 'GeometryCollection') {
+            feature.geometry = feature.geometry.geometries[0]
+          }
+        }
 
         // whether or not it should be possible to edit the layer
+        var layer = gF.eventJSON(jsonGeom, editable)
         if (editable === false) {
           layer.eachLayer(function (layer) {
             layer.options.editable = false
@@ -600,286 +607,5 @@ var gF = { // eslint-disable-line
         gF.add2LayerList(name, layer)
       }
     })
-  },
-  GMLtoGEOJSON: function (geom, type) { // eslint-disable-line
-    try {
-      var options = OpenLayers.Util.extend(
-        OpenLayers.Util.extend({}, {extractAttributes: true})
-      )
-
-      var vectors = new OpenLayers.Layer.Vector('Vector Layer')
-
-      var readerGeo
-      switch (type) {
-        case 'gml': {
-          readerGeo = new OpenLayers.Format.GML(options)
-          break
-        }
-        case 'gml-2': {
-          readerGeo = new OpenLayers.Format.GML.v2(options) // eslint-disable-line
-          break
-        }
-        case 'gml-3': {
-          readerGeo = new OpenLayers.Format.GML.v3(options) // eslint-disable-line
-          break
-        }
-        default: break
-      }
-
-      var oSerializer = new XMLSerializer()
-      var sXML = oSerializer.serializeToString(geom)
-
-      // OBS var xmlText = geomtoString //
-      var geoVector = readerGeo.read(sXML)
-
-      vectors.addFeatures(geoVector)
-
-      var UTM32 = proj4('+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs')
-
-      var readerJson = new OpenLayers.Format.GeoJSON()
-      var jsonString = readerJson.write(geoVector)
-      var json = JSON.parse(jsonString)
-
-      return reproject.toWgs84(json, UTM32, '')
-    } catch (e) {
-      alert(e)
-    }
-  },
-  // Takes a normal geoJSON and adds custom events
-  eventJSON: function (geoJSON, editable) {
-    // if a popup is already open, close it.
-    map.closePopup()
-
-    // defined at the end.
-    var layerStyle = gS.style.Standard
-
-    // creates the layer add style at end
-    var eventLayer = L.geoJSON(geoJSON)
-
-    .on('click', function (e) {
-        // set up variables
-      var layer = e.layer
-      var feature = layer.feature
-
-        // pan to layer
-      map.panTo(layer.getCenter())
-
-        // create a poput and set information equal to properties.
-      L.popup({
-        closeButton: false
-      })
-          .setLatLng(layer.getCenter())
-          .setContent(gF.infoPanel(feature.properties, editable))
-          .openOn(map)
-
-        /*******************************************************************************
-            If it is suppose to be editable (rediger and delete buttons)
-        *******************************************************************************/
-        // If the layer is clicked and editing is already enabled,
-        // show "Gem geometri instead of 'rediger'"
-      if (editable === true) {
-        if (layer.editEnabled() === true) {
-          $('#editGeom')
-              .removeClass('disabled-edit')
-              .addClass('enabled-edit')
-          $('#editGeom')
-              .first()
-              .text('Gem geometri')
-        }
-
-          // EDIT GEOMETRY
-        $('#editGeom')
-            .click(function () {
-              // If we are starting an editing session
-              if ($(this)
-                .hasClass('disabled-edit')) {
-                $(this)
-                  .removeClass('disabled-edit')
-                  .addClass('enabled-edit')
-                $(this)
-                  .first()
-                  .text('Gem geometri')
-                $('.infoEdit, .slide-menu')
-                  .remove()
-
-                // stop any previous editing
-                gF.disableEdits()
-
-                // remove itself from the guide array
-                map._custom.snap.removeGuide(layer)
-
-                // enable editing
-                layer.enableEdit()
-
-                // close the popup so it doesn't obscure the geometry
-                map.closePopup()
-
-                // open the editPanel (Edit attributes)
-                gF.editPanel(feature)
-
-                // if we are ending the editing session
-              } else {
-                // disable editing
-                layer.toggleEdit()
-
-                $(this)
-                  .removeClass('enabled-edit')
-                  .addClass('disabled-edit')
-                $(this)
-                  .first()
-                  .text('Rediger')
-
-                // update the layer.properties to match the editPanel
-                $('#infoTable > tr > .key')
-                  .each(function () {
-                    if ($(this)
-                      .siblings()
-                      .text() === 'null' || $(this)
-                      .siblings()
-                      .text()
-                      .length === 0) {
-                      layer.feature.properties[ $(this).attr('ref') ] = null
-                    } else {
-                      layer.feature.properties[ $(this).attr('ref') ] = $(this)
-                        .siblings()
-                        .text()
-                    }
-                  })
-
-                $('.infoEdit')
-                  .remove()
-
-                // prepare the object for the database
-                var updateObj = {}
-                for (var key in layer.feature.properties) {
-                  if (layer.feature.properties.hasOwnProperty(key)) {
-                    if (layer.feature.properties[ key ] !== null) {
-                      if (key === 'Type') {
-                        // loopUp is from styles_andlookups.js
-                        updateObj[ key ] = gS.lookUp(layer.feature.properties[ key ])
-                      } else {
-                        updateObj[ key ] = layer.feature.properties[ key ]
-                      }
-                    }
-                  }
-                }
-
-                // Update the database
-                updateObj.CG_GEOMETRY = layer.toGeoJSON()
-                  .geometry
-                dB.update(updateObj)
-
-                // add the edited layer to the guide arrays
-                map._custom.snap.addGuideLayer(layer)
-
-                // update legend
-                gF.updateLegend()
-              }
-            })
-
-          // REMOVE GEOMETRY
-        $('#deleteGeom')
-            .click(function () {
-              // remove the layer from the map
-              map.removeLayer(layer)
-              // close popups
-              map.closePopup()
-              // delete the ID from the database
-              dB.delete('ALL', layer.feature.properties.CG_ID)
-              // stop any editing
-              gF.disableEdits()
-            })
-
-          // If it is not suppose to be editable:
-      } else {
-          // COPY GEOMETRY
-        $('#copyGeom')
-            .click(function () {
-              // close popups
-              map.closePopup()
-
-              // close any editing going on
-              gF.disableEdits()
-
-              // create a geojson copy
-              var layerCopy = layer.toGeoJSON()
-              // get all fields from styles_and_lookups.js
-              map._custom.addFields = gS.getFields('all')
-              // add properties from URL parameters
-
-              if (gS.lookUp(layer.feature.properties.Type) !== 'undefined') {
-                layerCopy.properties.Type = gS.lookUp(layer.feature.properties.Type)
-              } else {
-                layerCopy.properties.Type = layer.feature.properties.Type
-              }
-
-              if (
-                layerCopy.properties.Type === 'undefined' ||
-                layerCopy.properties.Type === undefined
-              ) {
-                layerCopy.properties.Type = 'undefined'
-              }
-
-              // add the layer to the database and the map, make it editable (true)
-              gF.dbJSON(layerCopy, true)
-            })
-      }
-    })
-      // STYLES
-      .on('mouseover', function (e) {
-        // on hover take the colors and brighten + saturate them
-        if (e.layer.feature.properties) {
-          if (
-            e.layer.feature.properties.Type !== undefined &&
-            e.layer.feature.properties.Type !== 'undefined'
-          ) {
-            e.layer.setStyle({
-              color: 'rgba(' + chroma(e.layer.options.color)
-              .brighten()
-              .saturate()
-              .rgba() + ')',
-              fillColor: 'rgba(' + chroma(e.layer.options.fillColor)
-              .brighten()
-              .saturate()
-              .rgba() + ')',
-              opacity: e.layer.options.opacity * 1.15,
-              fillOpacity: e.layer.options.fillOpacity * 1.25,
-              weight: e.layer.options.weight * 1.2
-            })
-          }
-        }
-      })
-      // on mouse out reset style
-      .on('mouseout', function (e) {
-        if (e.layer.feature.properties) {
-          if (e.layer.feature.properties.Type) {
-            var type = e.layer.feature.properties.Type
-            if (gS.style[ type ]) {
-              e.layer.setStyle(gS.style[ type ])
-            } else {
-              e.layer.setStyle(gS.style[ gS.lookUp(type) ])
-            }
-          }
-        } else {
-          e.layer.setStyle(gS.style.Undefined)
-        }
-      })
-
-    // console.log(layerStyle);
-    eventLayer.eachLayer(function (layer) {
-      if (layer.feature.properties) {
-        if (layer.feature.properties.Type) {
-          var type = layer.feature.properties.Type
-          if (gS.style[ type ]) {
-            layerStyle = gS.style[ type ]
-          } else {
-            layerStyle = gS.style[ gS.lookUp(type) ]
-          }
-        }
-      }
-      layer.setStyle(layerStyle)
-    })
-
-    return eventLayer
   }
 }

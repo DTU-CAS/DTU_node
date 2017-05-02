@@ -246,29 +246,34 @@ function init () { // eslint-disable-line
     // Adds local dtu buildings layer
     var labels = L.layerGroup()
 
-    var wfsBase = 'http://services.nirasmap.niras.dk/kortinfo/services/Wfs.ashx?'
+    var wfsBase = 'http://services.nirasmap.niras.dk/kortinfo/services/Feature.ashx?'
     var wfsParams = {
       Site: 'Provider',
       Page: 'DTU',
-      UserName: 'DTUedit',
-      Password: 'Rette37g',
-      Service: 'WFS',
-      Request: 'GetFeature',
-      Typename: 'T20047',
-      Srsname: 'EPSG:3857'
+      userName: 'DTUView',
+      password: 'Bruger12',
+      LoginType: 'KortInfo',
+      layer: '6833',
+      srs: 'EPSG:4326',
+      output: 'geojson'
     }
+
     var wfsRequest = wfsBase + L.Util.getParamString(wfsParams, wfsBase, true)
 
     $.ajax({
       url: wfsRequest,
       success: function (geom) {
-        var jsonGeom = gF.GMLtoGEOJSON(geom, 'gml')
-        var stpByg = L.geoJSON(jsonGeom)
-        stpByg.eachLayer(function (layer) {
-          layer.feature.properties.Type = 'Bygninger'
-        })
+        var jsonGeom = geom
+		
+		// Remove the geometry collections and turn to polygons
+		for (var i = 0; i < jsonGeom.features.length; i += 1) {
+			var feature = jsonGeom.features[i]
+			if (feature.geometry.type === "GeometryCollection") {
+				feature.geometry = feature.geometry.geometries[0]
+			}
+		}
 
-        var dtuByg = gF.eventJSON(stpByg.toGeoJSON(), false)
+        var dtuByg = gF.eventJSON(jsonGeom, false)
         // Loop through buildings and create labels
         dtuByg.eachLayer(function (layer) {
           var properties = layer.feature.properties
