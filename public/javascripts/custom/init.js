@@ -35,10 +35,20 @@ function init () { // eslint-disable-line
       zoom: 16,
       maxZoom: 21,
       minZoom: 13,
-      zoomControl: true,
+      zoomControl: false,
       doubleClickZoom: false,
       editable: true // enables leaflet.editable
     })
+
+	L.control.scale({
+		position: 'bottomleft',
+		imperial: false,
+		metric: true
+	}).addTo(map);
+
+	L.control.zoom({
+		position: 'bottomleft'
+	}).addTo(map);
 
     // GST Ortho 2016
     var aerialImagery = L.tileLayer.wms('https://kortforsyningen.kms.dk/?servicename=orto_foraar', {
@@ -90,15 +100,15 @@ function init () { // eslint-disable-line
         'left': 300,
         'top': 300
       },
-      'layerControl': L.control.layers(basemaps, overlayMaps, {collapsed: false})
+      'layerControl': L.control.layers(basemaps, overlayMaps, {collapsed: false, position: 'topleft'})
         .addTo(map),
       'legendLayers': [],
       'snap': new L.Handler.MarkerSnap(map)
     }
 
-    /*******************************************************************************
+    /***************************************************************************
         Snapping functionality
-    *******************************************************************************/
+    ***************************************************************************/
     // initialize the snapHandler as a global
 
     var snapMarker = L.marker(map.getCenter(), {
@@ -181,24 +191,27 @@ function init () { // eslint-disable-line
         e.latlng.lng = latlng.lng
       })
       // This only fires when an original drawing is done.
-      .on('editable:drawing:end', function (e) {
+      .on('editable:drawing:commit', function (e) {
         this.off('mousemove', followMouse)
         snapMarker.remove()
-        if (e.layer._parts) {
-          if (e.layer._parts.length > 0) {
-            var layer2create = e.layer.toGeoJSON()
+        if (e.layer._path) {
+            var layer2create;
             var selected = $('.lastSelected').attr('ref')
+            if (selected === 'points') {
+              layer2create = L.polygon(e.layer.toPolygon());
+              layer2create = layer2create.toGeoJSON();
+            } else {
+              layer2create = e.layer.toGeoJSON()
+            }
 
             if (selected === 'undefined') {
               layer2create.properties.Type = 'Parkering'
-            } else if (selected === 'byggeri') {
+            } else if (selected === 'polygon') {
               layer2create.properties.Type = 'Midlertidig bygning'
-            } else if (selected === 'byggeplads') {
-              layer2create.properties.Type = 'Byggeplads'
-            } else if (selected === 'parkering') {
-              layer2create.properties.Type = 'Parkering'
-            } else if (selected === 'adgangsvej') {
+            } else if (selected === 'lines') {
               layer2create.properties.Type = 'Midlertidig gangsti'
+            } else if (selected === 'points') {
+              layer2create.properties.Type = 'PP-projekt'
             }
 
             gF.dbJSON(layer2create)
@@ -206,7 +219,6 @@ function init () { // eslint-disable-line
 
             $('.selected')
               .removeClass('selected')
-          }
         }
       })
 
@@ -253,7 +265,8 @@ function init () { // eslint-disable-line
       userName: 'DTUView',
       password: 'Bruger12',
       LoginType: 'KortInfo',
-      layer: '6833',
+      // layer: '6833',
+	  layer: '7448',
       srs: 'EPSG:4326',
       output: 'geojson'
     }
@@ -264,7 +277,7 @@ function init () { // eslint-disable-line
       url: wfsRequest,
       success: function (geom) {
         var jsonGeom = geom
-		
+
 		// Remove the geometry collections and turn to polygons
 		for (var i = 0; i < jsonGeom.features.length; i += 1) {
 			var feature = jsonGeom.features[i]
@@ -281,10 +294,9 @@ function init () { // eslint-disable-line
           var afsnit = properties.Afsnit
 
           // Create string if building if afsnit is not empty
-          var postStr = 'Bygning ' + bygnr
-          if (afsnit !== null && afsnit !== 0) {
-            postStr += ', ' + afsnit
-          }
+          var postStr = 'Bygning'
+		  if (bygnr && bygnr !== null && bygnr !== 0) {postStr += ' ' + bygnr}
+		  if (afsnit && afsnit !== null && afsnit !== 0) {postStr += ', ' + afsnit}
 
           // Create markers at the centroid of the building and attach toolTip
           if (bygnr !== null) {
@@ -384,13 +396,14 @@ function init () { // eslint-disable-line
           $(this)
             .addClass('selected')
             .addClass('lastSelected')
-          if ($(this)
-            .attr('ref') === 'adgangsvej') {
+          if ($(this).attr('ref') === 'polygon') {
             // create a polyline if it is a road -
-            map.editTools.startPolyline()
-          } else {
+            map.editTools.startPolygon();
+          } else if ($(this).attr('ref') === 'lines'){
+            map.editTools.startPolyline();
             // otherwise create a polygon.
-            map.editTools.startPolygon()
+          } else {
+            map.editTools.startCircle();
           }
         }
       })

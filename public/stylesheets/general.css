@@ -1,5 +1,5 @@
 * {
-  font-family: 'Open Sans', arial, sans-serif;
+  font-family: arial, verdana, sans-serif;
 }
 
 html, body {
@@ -67,8 +67,8 @@ body > p{
 
 #saveData{
   display: block;
-  margin-top: 200px;
-  background: #1ca8dd;
+  margin-top: 160px;
+  background: #3366CC;
   transition: all .10s ease-in-out;
   -moz-transition: all .10s ease-in-out;
   -webkit-transition: all .10s;
@@ -81,7 +81,7 @@ body > p{
 }
 
 #saveData:hover{
-  background: #1781a8;
+  background: #4c7ee2;
 }
 
 #saveData > p {
@@ -96,11 +96,10 @@ body > p{
   z-index: 901;
   width: 250px;
   min-height: 100%;
-  color: #fff;
   box-shadow: -3px 0px 7px rgba(0, 0, 0, 0.45);
   text-align: center;
-  background: #252830;
-  color: #fff;
+  background: white;
+  color: #000;
 }
 
 #text-bg{
@@ -195,7 +194,7 @@ body > p{
 }
 
 #menu {
-  background: #1f2025;
+  background: rgb(160, 160, 160);
   height: 40px;
   white-space: nowrap;
 }
@@ -205,7 +204,7 @@ body > p{
   margin-top: 10px;
   width: 110px;
   bottom: 0;
-  background: #434857;
+  background: #bfbfbf;
   position: relative;
   display: inline-block;
   text-align: center;
@@ -215,7 +214,6 @@ body > p{
   transition: all .1s ease-in-out;
   -moz-transition: all .1s ease-in-out;
   -webkit-transition: all .1s;
-  border-bottom: 2px solid #1f2025;
   border-radius: 2px;
   box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -233,11 +231,17 @@ body > p{
 
 .menu-item:hover {
   background: #1781a8;
+  border-bottom: 0;
 }
 
 .menu-item>p {
+  color: white;
   margin: 0;
-  margin-top: 4px;
+  margin-top: 8px;
+}
+
+#editLayer {
+	color: white;
 }
 
 #editButtons {
@@ -248,7 +252,7 @@ body > p{
 }
 
 #editButtons>div {
-  background: #434857;
+  background: rgb(153, 0, 0);
   margin-top: 2px;
   width: 160px;
   padding: 2px;
@@ -262,7 +266,7 @@ body > p{
   transition: all .15s ease-in-out;
   -moz-transition: all .15s ease-in-out;
   -webkit-transition: all .15s;
-  background: #1ca8dd;
+  background: rgb(255, 0, 0);
   cursor: pointer;
 }
 
@@ -307,6 +311,7 @@ body > p{
 
 #wfsLayers {
   margin-top: 25px;
+  color: white;
 }
 
 #layers, .layer-list {
@@ -336,11 +341,11 @@ body > p{
 }
 
 .off {
-  background: #e64759 !important;
+  background: rgb(255, 0, 0) !important;
 }
 
 .on, .layer-on {
-  background: #10b47b !important;
+  background: #63ab1a !important;
 }
 
 .layer-off {
@@ -367,13 +372,13 @@ body > p{
 }
 
 #bygID {
-  background: #252830;
+  background: white;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
   position: relative;
   display: block;
   bottom: 2px;
   margin: 0 auto;
-  color: white;
+  color: black;
   width: 300px;
   height: 30px;
   text-align: center;
@@ -414,7 +419,7 @@ body > p{
 }
 
 .selected {
-  background: #208eb8 !important;
+  background: #63ab1a !important;
 }
 
 .unselectable {
@@ -473,12 +478,6 @@ body > p{
 
 .show {
   display: block;
-}
-
-@media (max-width:700px) {
-  #bygID {
-    display: none;
-  }
 }
 
 .infoEdit {
@@ -583,4 +582,33 @@ body > p{
 
 .hoverPointer {
   cursor: pointer;
+}
+
+#menu-logo-bottom > img{
+	width: 100px;
+    position: absolute;
+    bottom: 50px;
+    right: 80px;
+}
+
+@media (max-width:700px) {
+  #bygID {
+    display: none;
+  }
+  
+  .leaflet-control-layers {
+	display: none;
+  }
+}
+
+@media screen and ( max-height: 800px ){
+    #menu-logo-bottom {
+		display: none;
+	}
+}
+
+@media screen and ( max-width: 900px ){
+    .leaflet-control-layers {
+		margin-top: 60px !important;
+	}
 }

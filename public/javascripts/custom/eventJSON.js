@@ -14,7 +14,7 @@ gF.eventJSON = function (geoJSON, editable) {
   .on('click', function (e) {
       // set up variables
     var layer = e.layer
-	var feature = layer.feature
+	  var feature = layer.feature
 
       // pan to layer
     map.panTo(layer.getCenter())
@@ -26,7 +26,6 @@ gF.eventJSON = function (geoJSON, editable) {
         .setLatLng(layer.getCenter())
         .setContent(gF.infoPanel(feature.properties, editable))
         .openOn(map)
-
 
       // If the layer is clicked and editing is already enabled,
       // show "Gem geometri instead of 'rediger'"
@@ -166,13 +165,6 @@ gF.eventJSON = function (geoJSON, editable) {
               layerCopy.properties.Type = layer.feature.properties.Type
             }
 
-            if (
-              layerCopy.properties.Type === 'undefined' ||
-              layerCopy.properties.Type === undefined
-            ) {
-              layerCopy.properties.Type = 'undefined'
-            }
-
             // add the layer to the database and the map, make it editable (true)
             gF.dbJSON(layerCopy, true)
           })
@@ -217,7 +209,7 @@ gF.eventJSON = function (geoJSON, editable) {
         e.layer.setStyle(gS.style.Undefined)
       }
     })
-  
+
   eventLayer.eachLayer(function (layer) {
 	// console.log(layer)
     if (layer.feature.properties) {
@@ -234,7 +226,7 @@ gF.eventJSON = function (geoJSON, editable) {
       }
     }
   // console.log(layerStyle)
-    
+
   })
 
   return eventLayer

@@ -143,7 +143,8 @@ var gS = { // eslint-disable-line
         'Aktivt',
         'Afsluttet',
         'Garanti',
-        'Ongoing'
+        'Ongoing',
+		'Pipeline'
       ]
     } else if (string === 'all' || string === 'Bygninger') {
       return [

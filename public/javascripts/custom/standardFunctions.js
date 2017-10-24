@@ -222,7 +222,7 @@ var gF = { // eslint-disable-line
           key !== 'ProjektID' &&
           key.indexOf('label') === -1 &&
           key.indexOf('Label') === -1 &&
-          key.indexOf('KortInfo') === -1 &&
+		  key.indexOf('KortInfo') === -1 &&
           obj[ key ] !== 'null' &&
           obj[ key ] !== null) {
           if (key === 'P_pladser' && (obj[ key ] === null || obj[ key ] === 'null')) {
@@ -260,6 +260,7 @@ var gF = { // eslint-disable-line
     map.eachLayer(function (layer) {
       if (layer instanceof L.Path) {
         if (layer.options && layer.feature) {
+		  // console.log(layer)
           if (map._legendLayers.indexOf(layer.feature.properties.Type) === -1) {
             map._legendLayers.push(layer.feature.properties.Type)
 
@@ -584,27 +585,27 @@ var gF = { // eslint-disable-line
       success: function (geom) {
         var jsonGeom = geom
 
-        // Remove the geometry collections and turn to polygons
-        for (var i = 0; i < jsonGeom.features.length; i += 1) {
-          var feature = jsonGeom.features[i]
-          if (feature.geometry.type === 'GeometryCollection') {
-            feature.geometry = feature.geometry.geometries[0]
-          }
-        }
+		// Remove the geometry collections and turn to polygons
+		for (var i = 0; i < jsonGeom.features.length; i += 1) {
+			var feature = jsonGeom.features[i]
+			if (feature.geometry.type === "GeometryCollection") {
+				feature.geometry = feature.geometry.geometries[0]
+			}
+		}
 
         // whether or not it should be possible to edit the layer
-        var layer = gF.eventJSON(jsonGeom, editable)
-        if (editable === false) {
-          layer.eachLayer(function (layer) {
-            layer.options.editable = false
-          })
-        } else {
-          layer.eachLayer(function (layer) {
-            layer.options.editable = true
-          })
-        }
+		var layer = gF.eventJSON(jsonGeom, editable)
+		if (editable === false) {
+			layer.eachLayer(function (layer) {
+			layer.options.editable = false
+			})
+		} else {
+			layer.eachLayer(function (layer) {
+			layer.options.editable = true
+			})
+		}
 
-        gF.add2LayerList(name, layer)
+		gF.add2LayerList(name, layer)
       }
     })
   }
